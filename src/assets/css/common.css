@@ -1,0 +1,45 @@
+.to-top-enter-active,
+.to-top-leave-active {
+  transition: all 0.3s;
+}
+.to-top-enter,
+.to-top-leave-to {
+  transform: translateY(15px);
+  opacity: 0;
+}
+.opacityShow-enter-active,
+.opacityShow-leave-active {
+  transition: all 0.3s;
+}
+.opacityShow-enter,
+.opacityShow-leave-to {
+  opacity: 0;
+}
+.to-bottom-enter-active,
+.to-bottom-leave-active {
+  transition: all 0.3s;
+}
+.to-bottom-enter,
+.to-bottom-leave-to {
+  transform: translateY(-15px);
+  opacity: 0;
+}
+/* 清除浮动 */
+.clearfix {
+  *zoom: 1;
+}
+.clearfix:before,
+.clearfix:after {
+  display: table;
+  line-height: 0;
+  content: "";
+}
+.clearfix:after {
+  clear: both;
+}
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: "微软雅黑";
+}
