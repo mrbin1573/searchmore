@@ -319,9 +319,9 @@ export default {
     inputLeave () {
       this.searchTipObj.show = false;
       this.bgBlur = false;
-      if(this.searchTipObj.data.length > 0) {
+      // if(this.searchTipObj.data.length > 0) {
         this.inputFocusBool = false;
-      }
+      // }
     },
 
     // 切换搜索引擎
@@ -699,6 +699,7 @@ export default {
         height: 100%;
         background: #fff;
         .iframe-item{
+          position: absolute;
           width: 100%;
           height:100%;
         }
