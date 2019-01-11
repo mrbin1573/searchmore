@@ -1,5 +1,7 @@
 # searchmore
 
+[中文说明](README_CN.md)
+
 > A Vue.js project
 
 ## Build Setup
