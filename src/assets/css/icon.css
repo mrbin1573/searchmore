@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'srhmo';
-  src:  url('fonts/srhmo.eot?t3mic4');
-  src:  url('fonts/srhmo.eot?t3mic4#iefix') format('embedded-opentype'),
-    url('fonts/srhmo.ttf?t3mic4') format('truetype'),
-    url('fonts/srhmo.woff?t3mic4') format('woff'),
-    url('fonts/srhmo.svg?t3mic4#srhmo') format('svg');
+  src:  url('fonts/srhmo.eot?x35xxo');
+  src:  url('fonts/srhmo.eot?x35xxo#iefix') format('embedded-opentype'),
+    url('fonts/srhmo.ttf?x35xxo') format('truetype'),
+    url('fonts/srhmo.woff?x35xxo') format('woff'),
+    url('fonts/srhmo.svg?x35xxo#srhmo') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -24,6 +24,33 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-cha:before {
+  content: "\e90f";
+}
+.icon-ditu:before {
+  content: "\e910";
+}
+.icon-gouwu:before {
+  content: "\e911";
+}
+.icon-img:before {
+  content: "\e912";
+}
+.icon-shanchu:before {
+  content: "\e913";
+}
+.icon-shipin:before {
+  content: "\e914";
+}
+.icon-wangluo:before {
+  content: "\e915";
+}
+.icon-wenxianjiansuoshenqing:before {
+  content: "\e916";
+}
+.icon-you:before {
+  content: "\e90e";
+}
 .icon-hongqi:before {
   content: "\e908";
 }
