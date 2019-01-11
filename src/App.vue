@@ -1,9 +1,9 @@
 <template>
   <div id="searchmore-content" :class="searchResultShow == true ? 'on-search' : ''">
     <div class="searchmore-box">
-      <!-- <div class="searchmore-logo-box">
+      <div class="searchmore-logo-box">
         <span class="searchmore-name">杉木搜索</span>
-      </div> -->
+      </div>
 
       <!-- 搜索和设置 控制位置变换 -->
       <div class="input-search-box">
