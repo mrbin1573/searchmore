@@ -10,6 +10,8 @@
         <!-- 搜索框 -->
         <div class="input-box">
           <input type="text" id="inputObj"
+          class="searchmore-input-text"
+          :class="{afterSearch:searchResultShow}"
           ref="inputbox"
           v-model="searchTxt"
           @keyup.enter="inputEnter"
@@ -18,12 +20,15 @@
           @focus="inputFocus"
           @keyup.up="tipUp"
           @keyup.down="tipDown"
-          placeholder="请输入搜索内容" class="searchmore-input-text">
+          placeholder="请输入搜索内容" >
 
           <!-- 搜索按钮 -->
           <label class="searchmore-submit">
-            <div class="submit-name hover-bg" @click="searchNow">更多结果</div>
-            <!-- 地图视频等其他搜索 -->
+            <div class="submit-name hover-bg" 
+            v-for="(searchObj, objName) in browserArr" 
+            v-if="searchObj.current"
+            @click="searchNow(objName)">搜索{{searchObj.name}}</div>
+            <!-- 其他搜索类型 -->
             <div class="more-search-opts" @mouseover="moreSearchShow = true" @mouseleave="moreSearchShow = false">
               <div class="more-trigger hover-bg">
                 <i class="icon-xiala"></i>
@@ -31,7 +36,10 @@
               <transition name="to-top">
                 <div class="more-search-list" v-show="moreSearchShow">
                   <ul>
-                    <li v-for="(searchObj, index) in browserArr" class="ms-item hover-bg" @click="searchNow">{{searchObj.name}}</li>
+                    <li  class="ms-item hover-bg"
+                    v-for="(searchObj, objName) in browserArr"
+                    v-if="searchObj.active"
+                    @click="searchNow(objName)">{{searchObj.name}}</li>
                   </ul>
                 </div>
               </transition>
@@ -71,8 +79,10 @@
         </transition>
 
         <!-- 设置页面 -->
-        <div class="set-panel">
-        <!-- <div class="set-panel" @mouseover="setPanelShow = true" @mouseleave="setPanelShow = false"> -->
+        <!-- <div class="set-panel"> -->
+        <div class="set-panel" 
+        @mouseover="setPanelShow = true" 
+        @mouseleave="setPanelShow = false">
           
           <!-- 设置齿轮图标 -->
           <div class="set-icon">
@@ -81,7 +91,9 @@
 
           <!-- 设置 浏览器 二维码 -->
           <transition name="to-top">
-            <div class="set-box" v-show="!setPanelShow">
+            <div class="set-box blur-bg-effect" 
+            v-show="setPanelShow"
+            >
               
               <!-- 统计，说明 -->
               <h5 class="set-title">
@@ -94,12 +106,19 @@
               </h5>
 
               <!-- 搜索配置选项列表 -->
-              <div class="browser-list-box clearfix" v-for="bsItemObj in browserArr">
-                <span><i :class="bsItemObj.iconName"></i> {{bsItemObj.name}}：</span>
-                <div class="browser-item" v-for="(bsItem, index) in bsItemObj.data"  :class="{active: bsItem.active}" @click="switchBrowser(index)">
-                  <!-- <div class="browser-icon" :style="{background:bsItem.iconColor}" :class="{noactive: !bsItem.active}">
-                    <i :class="bsItem.icon"></i>
-                  </div> -->
+              <div class="browser-list-box clearfix" v-for="(bsItemObj, indexParent) in browserArr">
+                <div class="switch-obj">
+                  <input class="switch-btn" type="checkbox" :checked="bsItemObj.active" :name="bsItemObj.name" :id="bsItemObj.iconName">
+                  <label :for="bsItemObj.iconName" @click="selectObj(indexParent)" class="switch-btn-label"></label>
+                </div>
+                <div class="obj-name">
+                  <i :class="bsItemObj.iconName"></i>&nbsp;
+                  <span>{{bsItemObj.name}}：</span>
+                </div>
+                <div class="browser-item" 
+                v-for="(bsItem, indexChild) in bsItemObj.data"  
+                :class="{txtUnavtive: !bsItem.active}" 
+                @click="switchBrowser(indexParent, indexChild)">
                   <h4 class="browser-name">{{bsItem.name}}</h4>
                 </div>
                 <!-- 手动添加按钮 -->
@@ -112,7 +131,7 @@
               </div>
 
               <!-- 扫一扫 -->
-              <div class="erwema-box">
+              <!-- <div class="erwema-box">
                 <div class="erweima-title">只要扫一下其中一个二维码，你的钱包就会少两块钱</div>
                 <div class="erweima-content">
                   <div class="erweima-img-box">
@@ -128,8 +147,9 @@
                     <span>支付宝</span>
                   </div>
                 </div>
-              </div>
+              </div> -->
 
+              <!-- <div class="blur-bg" :style="{backgroundImage: 'url(' +bgObj.src+ ')'}"></div> -->
             </div>
           </transition>
         </div>
@@ -143,8 +163,8 @@
         </div>
 
         <!-- 结果iframe -->
-        <div class="result-iframe-content" v-for="resultObj in browserArr" v-if="resultObj.active">
-          <transition-group name="to-bottom">
+        <div class="result-iframe-content" v-for="resultObj in browserArr" v-if="resultObj.current">
+          <transition-group name="to-bottom" tag="div">
             <iframe class="iframe-item" 
             v-for="resultItemFrame in resultObj.data"
             v-show="resultItemFrame.current == true && resultItemFrame.active == true"
@@ -166,14 +186,14 @@
     </transition>
     <!-- 搜索结果页面浏览器切换按钮 -->
     <transition name="to-bottom">
-      <div class="hd-broser-list" v-show="searchResultShow">
+      <div class="hd-broser-list" v-show="searchResultShow" v-for="(bsItemArr, parentObjName) in browserArr" v-if="bsItemArr.current">
         <transition-group name="to-bottom" tag="div">
           <div class="item"
+          v-for="(bsItem, indexChild) in bsItemArr.data" 
           :key="bsItem.name"
           :class="bsItem.current == true ? 'active hover-bg' : ''"
-          v-for="(bsItem, index) in browserArr" 
           v-if="bsItem.icon != 'icon-add' && bsItem.active == true"
-          @click="changeBrowser(index)">
+          @click="changeBrowser(parentObjName, indexChild)">
             <i :class="bsItem.icon"></i>
             {{bsItem.name}}
           </div>
@@ -184,12 +204,50 @@
 
     <!-- 背景 -->
     <div class="sm-bg" v-show="!searchResultShow">
-      <video :class="bgBlur == true ? 'blur' : ''" v-if="bgObj.type == 'video'" class="bg"  muted autoplay loop :src="bgObj.src"></video>
-      <img :class="bgBlur == true ? 'blur' : ''" v-if="bgObj.type == 'image'" class="bg" :src="bgObj.src"/>
+      <video :class="{focus:bgBlur}" v-if="bgObj.type == 'video'" class="bg"  muted autoplay loop :src="bgObj.src"></video>
+      <img :class="{focus:bgBlur}" v-if="bgObj.type == 'image'" class="bg" :src="bgObj.src"/>
     </div>
 
     <!-- 弹窗 -->
     <AlertBox :alertObj="alertObj"></AlertBox>
+
+    <!-- 书签 -->
+    <div class="book-mark">
+      <div class="bm-content">
+        <div class="triggrt">
+          <i class="icon-you"></i>
+        </div>
+        <div class="bm-list-box">
+          <ul class="bm-list">
+            <li class="bm-item">
+              <i class="icon-ditu"></i>
+              <span>工作</span>
+            </li>
+            <li class="bm-item">
+              <i class="icon-ditu"></i>
+              学习
+            </li>
+            <li class="bm-item">
+              <i class="icon-ditu"></i>
+              生活
+            </li>
+          </ul>
+        </div>
+
+        <div class="sub-list-content">
+          <div class="sub-list-box">
+
+            <div class="bm-bg-box">
+              <div class="bm-bg" :style="{backgroundImage: 'url(' +bgObj.src+ ')'}"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bm-bg-box">
+        <div class="bm-bg" :style="{backgroundImage: 'url(' +bgObj.src+ ')'}"></div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -229,7 +287,8 @@ export default {
       // 搜索引擎列表
       browserArr: {
         web:{
-          active: true,
+          active: true, // 是否可用
+          current: true, // 是否当前
           name:'网页',
           iconName:'icon-wangluo',
           data:[
@@ -299,7 +358,8 @@ export default {
           ]
         },
         image:{
-          active: false,
+          active: true,
+          current: false,
           name:'图片',
           iconName:'icon-img',
           data:[
@@ -370,8 +430,9 @@ export default {
         },
         music:{
           active: false,
+          current: false,
           name:'音乐',
-          iconName:'icon-img',
+          iconName:'icon-music',
           data:[
             {
               name: "百度",
@@ -440,6 +501,7 @@ export default {
         },
         video:{
           active: false,
+          current: false,
           name:'影视',
           iconName:'icon-shipin',
           data:[
@@ -510,6 +572,7 @@ export default {
         },
         map:{
           active: false,
+          current: false,
           name:'地图',
           iconName:'icon-ditu',
           data:[
@@ -580,6 +643,7 @@ export default {
         },
         file:{
           active: false,
+          current: false,
           name:'文档',
           iconName:'icon-wenxianjiansuoshenqing',
           data:[
@@ -650,6 +714,7 @@ export default {
         },
         buy:{
           active: false,
+          current: false,
           name:'购物',
           iconName:'icon-gouwu',
           data:[
@@ -787,16 +852,29 @@ export default {
   },
   methods: {
     // 搜索事件
-    searchNow () {
-      var searchTxt = this.searchTxt;
-      this.$refs.inputbox.blur();
+    searchNow (objName) {
+      var searchTxt = this.searchTxt; // 输入框文本
+      this.$refs.inputbox.blur(); // 让输入框失去焦点
       if (searchTxt != '') {
-        this.searchResultShow = true;
-        for(let i=0; i<this.browserArr.length; i++) {
-          if(this.browserArr[i].current == true) {
-            this.browserArr[i].resultSrc = this.browserArr[i].browserUrl + this.searchTxt;
+        this.searchResultShow = true; // 展示搜索结果页面
+        var brObj =  this.browserArr; // 所有内置搜索对象
+        var currentObj = brObj[objName]; // 当前搜索对象数组
+        for (let brObjItemName in brObj) {
+          // 非当前项目
+          // if (objName != brObjItemName) {
+          //   currentObj.current = false;
+          // } 
+          // // 当前项目
+          // else {
+          //   currentObj.current = true;
+          // }
+          for (let j=0; j<currentObj.data.length; j++) {
+            if(currentObj.data[j].current == true) {
+              currentObj.data[j].resultSrc = currentObj.data[j].browserUrl + this.searchTxt;
+            }
           }
         }
+        
       } else {
         this.alertObj.show = true;
         this.alertObj.text = "请输入搜索内容";
@@ -832,15 +910,16 @@ export default {
     },
 
     // 切换搜索引擎
-    changeBrowser (index) {
-      for ( var i=0; i<this.browserArr.length; i++) {
-        if (index == i) {
-          this.browserArr[i].current = true;
+    changeBrowser (parentObjName, indexChild) {
+      var brArr = this.browserArr[parentObjName].data;
+      for ( var i=0; i<brArr.length; i++) {
+        if (indexChild == i) {
+          brArr[i].current = true;
         } else {
-          this.browserArr[i].current = false;
+          brArr[i].current = false;
         };
       }
-      this.searchNow ();
+      this.searchNow (parentObjName);
     },
 
     // 添加搜索引擎
@@ -850,8 +929,8 @@ export default {
       this.alertObj.textEn = "too young too simple";
     },
     // 开启、关闭搜索引擎
-    switchBrowser (index) {
-      this.browserArr[index].active = !this.browserArr[index].active;
+    switchBrowser (indexParent, indexChild) {
+      this.browserArr[indexParent].data[indexChild].active = !this.browserArr[indexParent].data[indexChild].active;
     },
 
     // 百度提示
@@ -914,6 +993,11 @@ export default {
           this.browserArr[i].current = false;
         }
       }
+    },
+
+    // 激活、取消大类
+    selectObj (indexParent) {
+      this.browserArr[indexParent].active = !this.browserArr[indexParent].active;
     }
   },
   // 判断移动端
@@ -926,6 +1010,12 @@ export default {
     // 必应壁纸
     this.$http.jsonp('http://bing.ioliu.cn/v1',
       {
+        // params:{
+        //   d: 1,
+        //   w: 1920,
+        //   h: 1080,
+        //   r: 20
+        // },
         jsonp:'callback'
       })
       .then(function(res){
@@ -1023,15 +1113,18 @@ export default {
           border: none;
           width: 520px;
           height: 40px;
-          border-top:1px solid #f1f1f1;
-          border-bottom:1px solid #f1f1f1;
-          background: rgba(255, 255, 255, 0.8);
+          background: rgba(255, 255, 255, .5);
+          box-shadow: 0 0 30px rgb(255, 255, 255) inset;
           line-height: 40px;
           padding: 0 40px 0 30px;
           transition:@animateTime;
           font-size: 16px;
           float: left;
           outline: none;
+          &.afterSearch{
+            border-top:1px solid #d6d6d6;
+            border-bottom:1px solid #d6d6d6;
+          }
         }
         .searchmore-submit{
           position: relative;
@@ -1042,7 +1135,6 @@ export default {
           text-align: center;
           color: #fff;
           white-space: nowrap;
-          // overflow: hidden;
           background: @main-color;
           user-select: none;
           float: left;
@@ -1063,7 +1155,7 @@ export default {
               width: 20px;
               height: 40px;
               background: @main-color;
-              border-left: 1px solid #cc1212;
+              border-left: 1px solid #e03e3e;
               >i{
                 display:inline-block;
                 transition: @animateTime;
@@ -1161,6 +1253,8 @@ export default {
         .set-box{
           position:relative;
           width:100%;
+          max-height: 320px;
+          overflow-y: auto;
           background:rgba(255,255, 255, 0.8);
           box-shadow: @box-shadow;
           padding: 20px 20px 2px;
@@ -1168,12 +1262,59 @@ export default {
             display:flex;
             align-items: center;
             flex-wrap: wrap;
-            min-height:40px;
+            // min-height:40px;
             padding: 10px 0;
             // margin-top:5px;
             overflow-x: auto;
             &:not(:last-child){
               border-bottom: 1px dashed #969696;
+            }
+            // 开关
+            .switch-obj{
+              height:30px;
+              line-height:30px;
+              user-select: none;
+              display: flex;
+              align-items:center;
+              .switch-btn{
+                opacity: 0;
+                &:checked+.switch-btn-label{
+                  background:#11d8c7;
+                  &::after{
+                    left:23px;
+                  }
+                }
+              }
+              .switch-btn-label{
+                position:absolute;
+                cursor: pointer;
+                display:inline-block;
+                width: 45px;
+                height:24px;
+                border-radius:15px;
+                background:#d4d4d4;
+                transition: @animateTime;
+                &::after{
+                  position: absolute;
+                  content: "";
+                  transition: @animateTime;
+                  display:inline-block;
+                  left:2px;
+                  width:20px;
+                  height:20px;
+                  margin-top: 2px;
+                  border-radius:100%;
+                  background:rgb(255, 255, 255);
+                }
+              }
+            }
+            .obj-name{
+              margin-left: 40px;
+              height:30px;
+              line-height:30px;
+              display: flex;
+              align-items:center;
+              justify-content:center;
             }
             .browser-item{
               display:flex;
@@ -1182,44 +1323,34 @@ export default {
               justify-content:center;
               user-select: none;
               cursor: pointer;
-              height:22px;
-              background: #fff;
-              padding: 2px 5px;
+              height:30px;
+              padding: 4px 8px;
               margin-right: 10px;
-              border-radius: 11px;
+              border-radius: 15px;
               transition: @animateTime;
               letter-spacing: 2px;
+              color: @main-txt-color;
               .browser-icon{
                 display:flex;
                 justify-content:center;
                 align-items:center;
                 border-radius: 50%;
                 color: #fff;
-                width: 16px;
-                height: 16px;
+                width: 18px;
+                height: 18px;
                 font-size: 12px;
                 transition:@animateTime;
-                &.noactive{
-                  background: #b1b1b1 !important;
-                }
               }
               .browser-name{
-                color: #b1b1b1;
                 margin-left: 4px;
               }
-              &:hover{
-                background: #dfdfdf;
-                // .browser-icon{
-                //   color:#fff;
-                //   // transform: translateY(-3px);
-                // }
-                .browser-name{
-                  // color: red !important;
-                }
+              &.txtUnavtive:hover{
+                background: #818181;
               }
-              &.active{
+              &:hover{
+                background: @main-color;
                 .browser-name{
-                  color: @main-txt-color;
+                  color: #fff !important;
                 }
               }
             }
@@ -1257,6 +1388,21 @@ export default {
             color: @main-txt-color;
             font-size: 14px;
           }
+        }
+        .blur-bg{
+          position: fixed;
+          top:0;
+          left:0;
+          margin-left: -50%;
+          width:100%;
+          height:100%;
+          background-attachment: fixed;
+          background-repeat: no-repeat;
+          background-position: center;
+          background-color: #fff;
+          background-size: 100%;
+          transform: scale(1.1);
+          // filter: blur(30px);
         }
       }
       .search-tip{
@@ -1385,13 +1531,16 @@ export default {
     align-items:center;
     width: 100%;
     height: 100%;
+    min-width: 1300px;
     background: #ffffff;
     .bg{
       transition: @animateTime;
-      &.blur{
-        filter: brightness(70%);
+      // transform: scale(1.1);
+      &.focus{
+        filter: brightness(60%);
+        transform: scale(1.02);
       }
-      width: 102%;
+      width: 100%;
     }
   }
   &.on-search{
@@ -1403,6 +1552,117 @@ export default {
         li:hover{
             background-color: #f1f1f1;
           }
+      }
+    }
+  }
+  .book-mark{
+    position:fixed;
+    top:0;
+    left:0;
+    // transform: translateX(-100%);
+    transform: translateX(0%);
+    z-index: 150;
+    height: 100%;
+    width: 100px;
+    box-shadow: @box-shadow;
+    transition: @animateTime;
+    &:hover{
+      transform: translateX(0%);
+      .triggrt{
+        transform: rotate(180deg);
+        // margin-left: 40px;
+        // justify-content: flex-start;
+        background: rgba(255, 255, 255, 0.2) !important;
+      }
+    }
+    .bm-content{
+      position: absolute;
+      width:100%;
+      height:100%;
+      z-index: 200;
+      .triggrt{
+        position: absolute;
+        top: calc(~'50% - 25px');
+        left: calc(~'100% - 25px');
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border-radius: 50%;
+        color:#fff;
+        font-weight:bold;
+        background: @main-color;
+        transition:@animateTime;
+        transform-origin: 50% 50%;
+      }
+      .bm-list-box{
+        width:100%;
+        height:100%;
+        .bm-list{
+          height:100%;
+          width:100%;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          .bm-item{
+            position: relative;
+            list-style-type: none;
+            height:40px;
+            line-height: 40px;
+            width:100%;
+            text-align: center;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            font-weight: bold;
+            color:@main-txt-color;
+            &:hover{
+              background:rgba(255, 255, 255, .5);
+            }
+          }
+        }
+      }
+      .sub-list-content{
+        position: absolute;
+        display: flex;
+        align-items: center;
+        top:0;
+        left: 100px;
+        width: 100vw;
+        height:100%;
+        .sub-list-box{
+          margin-left: 40px;
+          background:rgba(255, 255, 255, 0.616);
+          width: 800px;
+          height:500px;
+          overflow: hidden;
+          box-shadow: @box-shadow;
+        }
+      }
+    }
+    .bm-bg-box{
+      position: relative;
+      width:100%;
+      height:100%;
+      z-index: 100;
+      overflow: hidden;
+      .bm-bg{
+        overflow: hidden;
+        position: relative;
+        margin-left: -50%;
+        margin-top: -50%;
+        width:200%;
+        height:200%;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-color: #fff;
+        background-size: 100%;
+        // transform: scale(1.1);
+        filter: blur(50px);
       }
     }
   }
