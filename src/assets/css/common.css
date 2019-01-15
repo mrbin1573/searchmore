@@ -24,6 +24,15 @@
   transform: translateY(-15px);
   opacity: 0;
 }
+.to-left-enter-active,
+.to-left-leave-active {
+  transition: all 0.3s;
+}
+.to-left-enter,
+.to-left-leave-to {
+  transform: translateX(15px);
+  opacity: 0;
+}
 /* 清除浮动 */
 .clearfix {
   *zoom: 1;
@@ -52,6 +61,11 @@
 .txtUnavtive {
   color: #7a7a7a !important;
   text-decoration: line-through;
+}
+.mid-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 /*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/
 ::-webkit-scrollbar {

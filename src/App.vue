@@ -12,9 +12,11 @@
           <input type="text" id="inputObj"
           class="searchmore-input-text"
           :class="{afterSearch:searchResultShow}"
-          ref="inputbox"
+          ref="inputbox" 
+          v-for="(searchObj, index) in browserArr" 
+          v-if="searchObj.current"
           v-model="searchTxt"
-          @keyup.enter="inputEnter"
+          @keyup.enter="inputEnter(index)"
           @input="getBaidu"
           @blur="inputLeave"
           @focus="inputFocus"
@@ -25,9 +27,9 @@
           <!-- 搜索按钮 -->
           <label class="searchmore-submit">
             <div class="submit-name hover-bg" 
-            v-for="(searchObj, objName) in browserArr" 
+            v-for="(searchObj, index) in browserArr" 
             v-if="searchObj.current"
-            @click="searchNow(objName)">搜索{{searchObj.name}}</div>
+            @click="searchNow(index)">搜索{{searchObj.name}}</div>
             <!-- 其他搜索类型 -->
             <div class="more-search-opts" @mouseover="moreSearchShow = true" @mouseleave="moreSearchShow = false">
               <div class="more-trigger hover-bg">
@@ -37,9 +39,9 @@
                 <div class="more-search-list" v-show="moreSearchShow">
                   <ul>
                     <li  class="ms-item hover-bg"
-                    v-for="(searchObj, objName) in browserArr"
+                    v-for="(searchObj, index) in browserArr"
                     v-if="searchObj.active"
-                    @click="searchNow(objName)">{{searchObj.name}}</li>
+                    @click="searchNow(index)">{{searchObj.name}}</li>
                   </ul>
                 </div>
               </transition>
@@ -52,15 +54,19 @@
           <div class="line-left" :class="inputFocusBool == true ? 'focus' : ''"></div>
 
           <!-- 输入框首选引擎 -->
-          <div class="first-engine" @mouseover="firstEngineShow = true" @mouseleave="firstEngineShow = false">
+          <div class="first-engine"  
+          v-for="(currentEngineArr, indexParent) in browserArr"
+          v-if="currentEngineArr.current"  
+          @mouseover="firstEngineShow = true"
+          @mouseleave="firstEngineShow = false">
             <!-- 输入框显示引擎图标 -->
-            <div class="now-engine" v-if="currentEngine.current"  v-for="(currentEngine, index) in browserArr">
+            <div class="now-engine" v-for="currentEngine in currentEngineArr.data" v-show="currentEngine.current">
               <i :class="currentEngine.icon" :style="{color:currentEngine.iconColor}"></i>
             </div>
             <transition name="to-top">
               <ul class="f-list-box" v-show="firstEngineShow" :style="{background: searchResultShow == true ? '#fff':''}">
                 <!-- <div class="tip">切换首选搜索引擎</div> -->
-                <li class="f-item" v-for="(currentEngine, index) in browserArr" @click="chooseThisEngineAnCurrent(index)" :class="{active:currentEngine.current}">
+                <li class="f-item" v-for="(currentEngine, indexChild) in currentEngineArr.data" @click="chooseThisEngineAnCurrent(indexParent, indexChild)" :class="{active:currentEngine.current}">
                   <i :class="currentEngine.icon" :style="{color:currentEngine.iconColor}"></i><span class="f-engine-name">{{currentEngine.name}}</span>
                 </li>
               </ul>
@@ -73,7 +79,12 @@
         <transition name="to-top">
           <div class="search-tip" v-show="searchTipObj.show">
             <ul>
-              <li class="tip-item" :class="{active:index == searchTipObj.nowIndex}" v-for="(tipItem, index) in searchTipObj.data" @click="selectTip(index)"><span>{{tipItem}}</span></li>
+              <li class="tip-item" 
+              :class="{active:index == searchTipObj.nowIndex}" 
+              v-for="(tipItem, index) in searchTipObj.data" 
+              @click="selectTip(index)">
+                <span>{{tipItem}}</span>
+              </li>
             </ul>
           </div>
         </transition>
@@ -98,21 +109,24 @@
               <!-- 统计，说明 -->
               <h5 class="set-title">
                 <span>
-                  点击图标，启用/取消搜索引擎&emsp;&emsp;
+                  设置搜索类型&emsp;&emsp;
                 </span>
                 <span id="busuanzi_container_site_pv">
                   搜索统计：<span id="busuanzi_value_site_pv"></span> 次
                 </span>
               </h5>
 
-              <!-- 搜索配置选项列表 -->
-              <div class="browser-list-box clearfix" v-for="(bsItemObj, indexParent) in browserArr">
+              <!-- 搜索配置选项 列表 -->
+              <div class="browser-list-box clearfix" 
+              v-for="(bsItemObj, indexParent) in browserArr"
+              draggable="true">
+                <div class="touch icon-tuodong"></div>
                 <div class="switch-obj">
                   <input class="switch-btn" type="checkbox" :checked="bsItemObj.active" :name="bsItemObj.name" :id="bsItemObj.iconName">
                   <label :for="bsItemObj.iconName" @click="selectObj(indexParent)" class="switch-btn-label"></label>
                 </div>
                 <div class="obj-name">
-                  <i :class="bsItemObj.iconName"></i>&nbsp;
+                  <!-- <i :class="bsItemObj.iconName"></i>&nbsp; -->
                   <span>{{bsItemObj.name}}：</span>
                 </div>
                 <div class="browser-item" 
@@ -123,7 +137,7 @@
                 </div>
                 <!-- 手动添加按钮 -->
                 <div class="browser-item active" @click="addBrowser()">
-                  <div class="browser-icon" style="background:#4e4e4e;">
+                  <div class="browser-icon mid-center" style="background:#4e4e4e;">
                     <i class="icon-add"></i>
                   </div>
                   <h4 class="browser-name">添加</h4>
@@ -212,42 +226,68 @@
     <AlertBox :alertObj="alertObj"></AlertBox>
 
     <!-- 书签 -->
-    <div class="book-mark">
+    <div class="book-mark" @mouseover="subBookMarkShow = true" @mouseleave="subBookMarkShow = false">
       <div class="bm-content">
         <div class="triggrt">
           <i class="icon-you"></i>
         </div>
+        <!-- 大类列表 -->
         <div class="bm-list-box">
           <ul class="bm-list">
-            <li class="bm-item">
-              <i class="icon-ditu"></i>
-              <span>工作</span>
-            </li>
-            <li class="bm-item">
-              <i class="icon-ditu"></i>
-              学习
-            </li>
-            <li class="bm-item">
-              <i class="icon-ditu"></i>
-              生活
+            <li  
+            draggable="true" 
+            class="bm-item hover-bg" 
+            v-for="(bmItem, index) in bookMark" 
+            @mouseover="hoverBookMark(index)"
+            :style="{order:bmItem.order}"
+            >
+              <div class="touch icon-tuodong"></div>
+              <i :class="bmItem.icon"></i>
+              <span class="menu-name">{{bmItem.name}}</span>
             </li>
           </ul>
         </div>
 
-        <div class="sub-list-content">
-          <div class="sub-list-box">
-
-            <div class="bm-bg-box">
-              <div class="bm-bg" :style="{backgroundImage: 'url(' +bgObj.src+ ')'}"></div>
+        <!-- 子类弹出框 -->
+        <transition name="opacityShow">
+          <div class="sub-list-content" v-show="subBookMarkShow">
+            <div class="sub-list-box" :class="{whitebg: searchResultShow}">
+              <div class="content-box" v-for="(bmItem, indexParent) in bookMark" v-show="bmItem.show">
+                <div class="sub-box-title">
+                  {{bmItem.name}}
+                </div>
+                <div class="submenu-list-box">
+                    <a class="sub-menu-item" draggable="true" target="_blank" :href="bmArr.url" v-for="(bmArr, indexChild) in bmItem.data">
+                      <div class="icon mid-center">
+                        <span class="icon-txt">{{bmArr.icon}}</span>
+                      </div>
+                      <span class="name">{{bmArr.name}}</span>
+                    </a>
+                    <!-- 添加数据 -->
+                    <a class="sub-menu-item" href="javascript:;">
+                      <div class="icon mid-center">
+                        <span class="icon-txt icon-add"></span>
+                      </div>
+                      <span class="name">添加书签</span>
+                    </a>
+                </div>
+              </div>
+              <div class="bm-bg-box">
+                <div class="bm-bg" v-show="!searchResultShow" :style="{backgroundImage: 'url(' +bgObj.src+ ')'}"></div>
+              </div>
             </div>
           </div>
-        </div>
+        </transition>
       </div>
-      <div class="bm-bg-box">
+      <!-- <div class="bm-bg-box">
         <div class="bm-bg" :style="{backgroundImage: 'url(' +bgObj.src+ ')'}"></div>
-      </div>
+      </div> -->
     </div>
 
+    <!-- 下载壁纸 -->
+    <a :href="bgObj.src" target="_blank" class="down-wallpapper mid-center" title="下载壁纸">
+      <i class="icon-xiazai"></i>
+    </a>
   </div>
 </template>
 
@@ -272,6 +312,8 @@ export default {
       setPanelShow: false,
       // 搜索结果展示
       searchResultShow: false,
+      // 书签子类展示
+      subBookMarkShow: false,
       // 输入框下拉关键词
       searchTipObj: {
         show: false,
@@ -285,8 +327,8 @@ export default {
       // 输入提交按钮，更多搜索选项展示
       moreSearchShow: false,
       // 搜索引擎列表
-      browserArr: {
-        web:{
+      browserArr: [
+        {
           active: true, // 是否可用
           current: true, // 是否当前
           name:'网页',
@@ -357,7 +399,7 @@ export default {
             }
           ]
         },
-        image:{
+        {
           active: true,
           current: false,
           name:'图片',
@@ -365,7 +407,7 @@ export default {
           data:[
             {
               name: "百度",
-              browserUrl: 'https://www.baidu.com/s?wd=',
+              browserUrl: 'https://image.baidu.com/search/index?tn=baiduimage&word=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-baidu",
               use: true, // 是否首选项
@@ -391,7 +433,7 @@ export default {
             },
             {
               name: "360",
-              browserUrl: 'https://www.so.com/s?q=',
+              browserUrl: 'http://image.so.com/i?q=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-360",
               use: false,
@@ -402,7 +444,7 @@ export default {
             },
             {
               name: "搜狗",
-              browserUrl: 'https://www.sogou.com/web?query=',
+              browserUrl: 'https://pic.sogou.com/pics?query=',
               resultSrc:'',
               icon: "icon-sougou",
               bgColor: "background: #f84a19",
@@ -414,7 +456,7 @@ export default {
             },
             {
               name: "必应",
-              browserUrl: 'https://cn.bing.com/search?q=',
+              browserUrl: 'https://cn.bing.com/images/search?q=',
               resultSrc:'',
               icon: "icon-bing",
               use: false,
@@ -428,11 +470,11 @@ export default {
             }
           ]
         },
-        music:{
+        {
           active: false,
           current: false,
           name:'音乐',
-          iconName:'icon-music',
+          iconName:'icon-yinyue',
           data:[
             {
               name: "百度",
@@ -499,7 +541,7 @@ export default {
             }
           ]
         },
-        video:{
+        {
           active: false,
           current: false,
           name:'影视',
@@ -570,7 +612,7 @@ export default {
             }
           ]
         },
-        map:{
+        {
           active: false,
           current: false,
           name:'地图',
@@ -641,7 +683,7 @@ export default {
             }
           ]
         },
-        file:{
+        {
           active: false,
           current: false,
           name:'文档',
@@ -712,7 +754,7 @@ export default {
             }
           ]
         },
-        buy:{
+        {
           active: false,
           current: false,
           name:'购物',
@@ -839,7 +881,166 @@ export default {
             },
           ]
         },
-      },
+      ],
+      // 书签
+      bookMark: [
+        {
+          name:'学习',
+          icon:'icon-zaixianxuexi',
+          order:'1',
+          show: true,
+          data: [
+            {
+              name: 'csdn',
+              icon: 'csdn',
+              bgColor:'',
+              url:'http://w3more.cn/'
+            },
+            {
+              name: 'vue',
+              icon: 'V',
+              bgColor:'',
+              url:'http://w3more.cn/'
+            },
+            {
+              name: 'React',
+              icon: 'React',
+              bgColor:'',
+              url:'http://w3more.cn/'
+            },
+          ]
+        },
+        {
+          name:'生活',
+          icon:'icon-kafei',
+          order:'2',
+          show: false,
+          data: [
+            {
+              name: '生活',
+              icon: '生活',
+              bgColor:'',
+              url:'http://w3more.cn/'
+            },
+            {
+              name: '生活',
+              icon: '生活',
+              bgColor:'',
+              url:'http://w3more.cn/'
+            },
+            {
+              name: '生活',
+              icon: '生活',
+              bgColor:'',
+              url:'http://w3more.cn/'
+            },
+          ]
+        },
+        {
+          name:'工作',
+          icon:'icon-gongzuo',
+          order:'3',
+          show: false,
+          data: [
+            {
+              name: '工作',
+              icon: '工作',
+              bgColor:'',
+              url:'http://w3more.cn/'
+            },
+            {
+              name: '工作',
+              icon: '工作',
+              bgColor:'',
+              url:'http://w3more.cn/'
+            },
+            {
+              name: '工作',
+              icon: '工作',
+              bgColor:'',
+              url:'http://w3more.cn/'
+            },
+          ]
+        },
+        {
+          name:'工作4',
+          icon:'icon-gongzuo',
+          order:'4',
+          show: false,
+          data: [
+            {
+              name: '工作',
+              icon: '工作',
+              bgColor:'',
+              url:'http://w3more.cn/'
+            },
+            {
+              name: '工作',
+              icon: '工作',
+              bgColor:'',
+              url:'http://w3more.cn/'
+            },
+            {
+              name: '工作',
+              icon: '工作',
+              bgColor:'',
+              url:'http://w3more.cn/'
+            },
+          ]
+        },
+        {
+          name:'工作6',
+          icon:'icon-gongzuo',
+          order:'6',
+          show: false,
+          data: [
+            {
+              name: '工作',
+              icon: '工作',
+              bgColor:'',
+              url:'http://w3more.cn/'
+            },
+            {
+              name: '工作',
+              icon: '工作',
+              bgColor:'',
+              url:'http://w3more.cn/'
+            },
+            {
+              name: '工作',
+              icon: '工作',
+              bgColor:'',
+              url:'http://w3more.cn/'
+            },
+          ]
+        },
+        {
+          name:'工作5',
+          icon:'icon-gongzuo',
+          order:'5',
+          show: false,
+          data: [
+            {
+              name: '工作',
+              icon: '工作',
+              bgColor:'',
+              url:'http://w3more.cn/'
+            },
+            {
+              name: '工作',
+              icon: '工作',
+              bgColor:'',
+              url:'http://w3more.cn/'
+            },
+            {
+              name: '工作',
+              icon: '工作',
+              bgColor:'',
+              url:'http://w3more.cn/'
+            },
+          ]
+        },
+      ],
       // 搜索输入框值
       searchTxt: '',
       // 弹窗显示
@@ -852,26 +1053,23 @@ export default {
   },
   methods: {
     // 搜索事件
-    searchNow (objName) {
+    searchNow (index) {
       var searchTxt = this.searchTxt; // 输入框文本
-      this.$refs.inputbox.blur(); // 让输入框失去焦点
+      // this.$refs.inputbox.blur(); // 让输入框失去焦点
       if (searchTxt != '') {
         this.searchResultShow = true; // 展示搜索结果页面
         var brObj =  this.browserArr; // 所有内置搜索对象
-        var currentObj = brObj[objName]; // 当前搜索对象数组
-        for (let brObjItemName in brObj) {
-          // 非当前项目
-          // if (objName != brObjItemName) {
-          //   currentObj.current = false;
-          // } 
-          // // 当前项目
-          // else {
-          //   currentObj.current = true;
-          // }
-          for (let j=0; j<currentObj.data.length; j++) {
-            if(currentObj.data[j].current == true) {
-              currentObj.data[j].resultSrc = currentObj.data[j].browserUrl + this.searchTxt;
+        var currentObj = brObj[index]; // 当前搜索对象数组
+        for (let i=0; i<brObj.length; i++) {
+          if(i == index) {
+            brObj[i].current = true;
+            for (let j=0; j<currentObj.data.length; j++) {
+              if(currentObj.data[j].current == true) {
+                currentObj.data[j].resultSrc = currentObj.data[j].browserUrl + this.searchTxt;
+              }
             }
+          } else {
+            brObj[i].current = false;
           }
         }
         
@@ -883,9 +1081,9 @@ export default {
     },
 
     // 输入框enter
-    inputEnter () {
+    inputEnter (index) {
       this.searchTipObj.show = false;
-      this.searchNow();
+      this.searchNow(index);
     },
 
     // 聚焦输入框
@@ -985,12 +1183,13 @@ export default {
     },
 
     // 输入框 切换首选搜索引擎
-    chooseThisEngineAnCurrent (index) {
-      for(let i = 0; i < this.browserArr.length; i++) {
-        if(i == index) {
-          this.browserArr[index].current = true;
+    chooseThisEngineAnCurrent (indexParent, indexChild) {
+      var thisArr = this.browserArr[indexParent].data;
+      for(let i = 0; i < thisArr.length; i++) {
+        if(i == indexChild) {
+          thisArr[i].current = true;
         } else {
-          this.browserArr[i].current = false;
+          thisArr[i].current = false;
         }
       }
     },
@@ -998,6 +1197,24 @@ export default {
     // 激活、取消大类
     selectObj (indexParent) {
       this.browserArr[indexParent].active = !this.browserArr[indexParent].active;
+    },
+
+    // 鼠标覆盖变迁大类
+    hoverBookMark (index) {
+      for(let i=0; i<this.bookMark.length; i++) {
+        if(i == index) {
+          this.bookMark[i].show = true;
+        } else {
+          this.bookMark[i].show = false;
+        }
+      }
+    },
+
+    // 跳转书签
+    toBookMark(indexParent, indexChild) {
+      console.log(
+        this.bookMark[indexParent].data[indexChild].url
+      )
     }
   },
   // 判断移动端
@@ -1054,7 +1271,7 @@ export default {
 </script>
 
 <style lang="less">
-@import 'assets/css/icon.css';
+@import 'assets/css/style.css';
 @import 'assets/css/common.less';
 #searchmore-content{
   // display:none;
@@ -1255,19 +1472,23 @@ export default {
           width:100%;
           max-height: 320px;
           overflow-y: auto;
-          background:rgba(255,255, 255, 0.8);
+          background:rgba(255,255, 255, 0.9);
           box-shadow: @box-shadow;
           padding: 20px 20px 2px;
           .browser-list-box{
             display:flex;
             align-items: center;
             flex-wrap: wrap;
-            // min-height:40px;
             padding: 10px 0;
-            // margin-top:5px;
             overflow-x: auto;
+            user-select: none;
             &:not(:last-child){
-              border-bottom: 1px dashed #969696;
+              border-bottom: 1px dotted #969696;
+            }
+            .touch{
+              height: 40px;
+              line-height: 40px;
+              cursor: move;
             }
             // 开关
             .switch-obj{
@@ -1292,7 +1513,7 @@ export default {
                 width: 45px;
                 height:24px;
                 border-radius:15px;
-                background:#d4d4d4;
+                background:#adadad;
                 transition: @animateTime;
                 &::after{
                   position: absolute;
@@ -1559,8 +1780,8 @@ export default {
     position:fixed;
     top:0;
     left:0;
-    // transform: translateX(-100%);
-    transform: translateX(0%);
+    transform: translateX(-99%);
+    // transform: translateX(0%);
     z-index: 150;
     height: 100%;
     width: 100px;
@@ -1568,11 +1789,12 @@ export default {
     transition: @animateTime;
     &:hover{
       transform: translateX(0%);
-      .triggrt{
-        transform: rotate(180deg);
-        // margin-left: 40px;
-        // justify-content: flex-start;
-        background: rgba(255, 255, 255, 0.2) !important;
+      .bm-content{
+        .triggrt{
+          transform: rotate(180deg);
+          margin-left: 50px;
+          // background: rgba(255, 255, 255, 0.2) !important;
+        }
       }
     }
     .bm-content{
@@ -1582,13 +1804,16 @@ export default {
       z-index: 200;
       .triggrt{
         position: absolute;
-        top: calc(~'50% - 25px');
+        z-index: 110;
+        // top: 40vh;
+        top: calc(~"50% - 20px");
         left: calc(~'100% - 25px');
-        width: 50px;
-        height: 50px;
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-end;
+        width: 40px;
+        height: 40px;
+        padding-right: 2px;
         cursor: pointer;
         border-radius: 50%;
         color:#fff;
@@ -1598,8 +1823,14 @@ export default {
         transform-origin: 50% 50%;
       }
       .bm-list-box{
+        position: relative;
+        z-index: 120;
         width:100%;
         height:100%;
+        background: rgb(22, 22, 22);
+        border-right: 2px solid @main-color;
+        display: flex;
+        align-items: center;
         .bm-list{
           height:100%;
           width:100%;
@@ -1609,16 +1840,34 @@ export default {
           align-items: center;
           .bm-item{
             position: relative;
+            display: flex;
             list-style-type: none;
-            height:40px;
-            line-height: 40px;
+            height:50px;
+            line-height: 50px;
             width:100%;
             text-align: center;
-            border-top: 1px solid rgba(0, 0, 0, 0.1);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             cursor: pointer;
             font-weight: bold;
-            color:@main-txt-color;
+            color:#fff;
+            user-select: none;
+            .touch,>i{
+              height: 50px;
+              line-height: 50px;
+            }
+            .touch{
+              margin-right: 10px;
+              color: rgb(209, 209, 209);
+              &:hover{
+                cursor: move;
+              }
+            }
+            .menu-name{
+              margin-left: 3px;
+            }
+            &:first-child{
+              border-top: 1px solid rgba(255, 255, 255, 0.1);
+            }
             &:hover{
               background:rgba(255, 255, 255, .5);
             }
@@ -1626,45 +1875,126 @@ export default {
         }
       }
       .sub-list-content{
-        position: absolute;
-        display: flex;
-        align-items: center;
-        top:0;
+        position: fixed;
+        z-index: 120;
+        // background:rgb(51, 51, 51);
+        // width: 800px;
+        width: 70vw;
+        height:80vh;
+        top:50%;
         left: 100px;
-        width: 100vw;
-        height:100%;
+        margin-top: -40vh;
+        // width: 100vw;
+        // height:100%;
         .sub-list-box{
+          position: relative;
           margin-left: 40px;
-          background:rgba(255, 255, 255, 0.616);
-          width: 800px;
-          height:500px;
+          height:80vh;
           overflow: hidden;
-          box-shadow: @box-shadow;
+          box-shadow: 5px 0 50px rgba(0, 0, 0, 0.3);
+          background:rgba(255, 255, 255, 0.9);
+          &.whitebg{
+            background: rgb(255, 255, 255);
+          }
+          .content-box{
+            position: absolute;
+            z-index:100;
+            display: flex;
+            flex-direction: row;
+            .sub-box-title{
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width:40px;
+              height:80vh;
+              background: @main-color;
+              color: #fff;
+              font-size: 20px;
+              font-weight: bold;
+              letter-spacing: 10px;
+              writing-mode: vertical-lr;
+            }
+            .submenu-list-box{
+              width:calc(~'100% - 40px');
+              height:100%;
+              padding: 20px;
+              overflow: auto;
+              height:80vh;
+              .sub-menu-item{
+                width:100px;
+                height:100px;
+                margin:2px;
+                float: left;
+                background: rgba(0, 0, 0, 0.3);
+                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                transition: @animateTime;
+                user-select: none;
+                text-decoration: none;
+                .icon{
+                  width: 55px;
+                  height: 55px;
+                  border-radius: 50%;
+                  background: rgba(0, 0, 0, 0.322);
+                  .icon-txt{
+                    color: #fff;
+                  }
+                }
+                .name{
+                  color:#fff;
+                  margin-top: 5px;
+                }
+                &:active{
+                  transform: scale(.9);
+                }
+                &:hover{
+                  background: rgba(48, 48, 48, 0.3);
+                  box-shadow: @box-shadow;
+                }
+              }
+            }
+          }
+          .bm-bg-box{
+            position: absolute;
+            width: 100vw;
+            height:100vh;
+            z-index: 10;
+            overflow: hidden;
+            .bm-bg{
+              overflow: hidden;
+              position: relative;
+              margin-left: -50%;
+              margin-top: -50%;
+              width:200%;
+              height:200%;
+              background-attachment: fixed;
+              background-repeat: no-repeat;
+              background-position: center;
+              // background-color: #fff;
+              background-size: 100%;
+              // transform: scale(1.1);
+              opacity: .8;
+              filter: blur(50px) brightness(1.5);
+            }
+          }
         }
       }
     }
-    .bm-bg-box{
-      position: relative;
-      width:100%;
-      height:100%;
-      z-index: 100;
-      overflow: hidden;
-      .bm-bg{
-        overflow: hidden;
-        position: relative;
-        margin-left: -50%;
-        margin-top: -50%;
-        width:200%;
-        height:200%;
-        background-attachment: fixed;
-        background-repeat: no-repeat;
-        background-position: center;
-        background-color: #fff;
-        background-size: 100%;
-        // transform: scale(1.1);
-        filter: blur(50px);
-      }
-    }
+  }
+  .down-wallpapper{
+    position: fixed;
+    z-index: 100;
+    bottom: 10px;
+    right:10px;
+    width: 40px;
+    height:40px;
+    border-radius: 50%;
+    color: rgb(216, 216, 216);
+    background: rgba(0, 0, 0, 0.8);
+    cursor: pointer;
   }
 }
 </style>
