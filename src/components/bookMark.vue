@@ -1,79 +1,114 @@
 <template>
-  <transition name="opacityShow">
-    <div class="alert-box" v-show="alertObj.show">
-      <transition name="to-top">
-        <div class="alert-content" v-show="alertObj.show">
-          <div class="title">
-            sexy coder online tips
-          </div>
-          <div class="content">
-            <i class="icon icon-jinggao"></i>&nbsp;
-            {{alertObj.text}}
-            <span class="txt-en">{{alertObj.textEn}}</span>
-          </div>
+  <transition name="to-top" tag="div">
+    <div>
+      <a
+        class="sub-menu-item"
+        draggable="true"
+        target="_blank"
+        v-for="(bmItem, index) in bookMarkArr"
+        :href="bmItem.url"
+        @click.prevent.right="editBookMarkItem"
+      >
+        <div class="icon mid-center" :style="{background: bmItem.bgColor}">
+          <span class="icon-txt" :class="bmItem.icon">{{bmItem.icon}}</span>
         </div>
-      </transition>
+        <span class="name">{{bmItem.name}}</span>
+        <div class="del-bmark mid-center" v-show="editShow" @click.prevent="deleNow">
+          <i class="icon-cha"></i>
+        </div>
+      </a>
+      <!-- 添加 -->
+      <div
+        class="sub-menu-item"
+        draggable="true"
+        target="_blank"
+        href="javascript:;"
+        @click.prevent="addBookMark"
+      >
+        <div class="icon mid-center">
+          <span class="icon-txt icon-add"></span>
+        </div>
+        <span class="name">添加</span>
+      </div>
     </div>
   </transition>
 </template>
 
 <script>
 export default {
-  name: 'bookMark',
-  props:['alertObj'],
-  data () {
+  name: "bookMark",
+  props: ["bookMarkArr"],
+  data(){
     return {
+      editShow: false
     }
   },
-}
+  methods: {
+    // 右击显示删除
+    editBookMarkItem () {
+      this.editShow = true;
+      // alert('右击')
+    },
+    deleNow () {
+      alert('删除')
+    },
+    addBookMark () {
+      alert('添加')
+    }
+  }
+};
 </script>
 
 <style lang="less">
-  @import '../assets/css/common.less';
-  .alert-box{
-    position: fixed;
-    width: 100%;
-    min-height:100%;
-    z-index: 100;
-    .alert-content{
-      margin: 10% auto 0;
-      display: flex;
-      flex-direction: column;
-      width: 400px;
-      user-select: none;
-      background:rgb(255, 255, 255);
-      box-shadow: @box-shadow;
-      cursor: pointer;
-      .title{
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: @main-txt-color;
-        font-size: 18px;
-        color: #fff;
-        font-weight: bold;
-        width:100%;
-        height: 50px;
-      }
-      .content{
-        color: @main-color;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        padding: 30px 20px 40px;
-        min-height:150px;
-        align-items: center;
-        font-size: 24px;
-        font-weight: bold;
-        .icon{
-          margin-bottom: 10px;
-          font-size: 50px;
-        }
-        .txt-en{
-          font-size: 16px;
-          font-weight: normal;
-        }
-      }
+@import "../assets/css/common.less";
+.sub-menu-item {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 4px;
+  float: left;
+  background: rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: @animateTime;
+  user-select: none;
+  text-decoration: none;
+  text-align: center;
+  .icon {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.322);
+    overflow: hidden;
+    .icon-txt {
+      color: #fff;
     }
   }
+  .name {
+    color: #fff;
+    font-size: 12px;
+    margin-top: 5px;
+  }
+  .del-bmark{
+    position: absolute;
+    top:0;
+    right:0;
+    width:30px;
+    height: 30px;
+    color: @main-color;
+    background: rgba(0, 0, 0, 0.5);
+    font-size: 12px;
+  }
+  &:active {
+    transform: scale(0.9);
+  }
+  &:hover {
+    background: rgba(48, 48, 48, 0.3);
+    box-shadow: @box-shadow;
+  }
+}
 </style>
+

@@ -3,6 +3,7 @@
     <div class="searchmore-box">
       <!-- <div class="searchmore-logo-box">
         <span class="searchmore-name">杉木搜索</span>
+        {{commonBookMarkShow}}
       </div> -->
 
       <!-- 搜索和设置 控制位置变换 -->
@@ -13,10 +14,10 @@
           class="searchmore-input-text"
           :class="{afterSearch:searchResultShow}"
           ref="inputbox" 
-          v-for="(searchObj, index) in browserArr" 
+          v-for="(searchObj, indexParent) in browserArr" 
           v-if="searchObj.current"
           v-model="searchTxt"
-          @keyup.enter="inputEnter(index)"
+          @keyup.enter="inputEnter(indexParent)"
           @input="getBaidu"
           @blur="inputLeave"
           @focus="inputFocus"
@@ -54,35 +55,39 @@
           <div class="line-left" :class="inputFocusBool == true ? 'focus' : ''"></div>
 
           <!-- 输入框首选引擎 -->
-          <div class="first-engine"  
+          <!-- <div class="first-engine"  
           v-for="(currentEngineArr, indexParent) in browserArr"
           v-if="currentEngineArr.current"  
           @mouseover="firstEngineShow = true"
           @mouseleave="firstEngineShow = false">
-            <!-- 输入框显示引擎图标 -->
+            输入框显示引擎图标
             <div class="now-engine" v-for="currentEngine in currentEngineArr.data" v-show="currentEngine.current">
               <i :class="currentEngine.icon" :style="{color:currentEngine.iconColor}"></i>
             </div>
             <transition name="to-top">
               <ul class="f-list-box" v-show="firstEngineShow" :style="{background: searchResultShow == true ? '#fff':''}">
-                <!-- <div class="tip">切换首选搜索引擎</div> -->
+                <div class="tip">切换首选搜索引擎</div>
                 <li class="f-item" v-for="(currentEngine, indexChild) in currentEngineArr.data" @click="chooseThisEngineAnCurrent(indexParent, indexChild)" :class="{active:currentEngine.current}">
                   <i :class="currentEngine.icon" :style="{color:currentEngine.iconColor}"></i><span class="f-engine-name">{{currentEngine.name}}</span>
                 </li>
               </ul>
             </transition>
-          </div>
+          </div> -->
 
         </div>
 
-        <!-- 搜索结果提示 -->
+        <!-- 搜索结果 提示 -->
         <transition name="to-top">
-          <div class="search-tip" v-show="searchTipObj.show">
+          <div class="search-tip" 
+          v-show="searchTipObj.show"
+          v-for="(searchObj, indexParent) in browserArr" 
+          v-if="searchObj.current"
+          >
             <ul>
               <li class="tip-item" 
-              :class="{active:index == searchTipObj.nowIndex}" 
-              v-for="(tipItem, index) in searchTipObj.data" 
-              @click="selectTip(index)">
+              :class="{active:indexChild == searchTipObj.nowIndex}" 
+              v-for="(tipItem, indexChild) in searchTipObj.data" 
+              @click="selectTip(indexParent, indexChild)">
                 <span>{{tipItem}}</span>
               </li>
             </ul>
@@ -121,10 +126,18 @@
               v-for="(bsItemObj, indexParent) in browserArr"
               draggable="true">
                 <div class="touch icon-tuodong"></div>
-                <div class="switch-obj">
-                  <input class="switch-btn" type="checkbox" :checked="bsItemObj.active" :name="bsItemObj.name" :id="bsItemObj.iconName">
+                <MySwitch 
+                :switchChecked="bsItemObj.active" 
+                :switchName="bsItemObj.name"
+                :switchId="indexParent"
+                ></MySwitch>
+                <!-- <div class="switch-obj">
+                  <input class="switch-btn" type="checkbox" 
+                  :switchChecked="bsItemObj.active" 
+                  :switchName="bsItemObj.name" 
+                  :switchId="bsItemObj.iconName">
                   <label :for="bsItemObj.iconName" @click="selectObj(indexParent)" class="switch-btn-label"></label>
-                </div>
+                </div> -->
                 <div class="obj-name">
                   <!-- <i :class="bsItemObj.iconName"></i>&nbsp; -->
                   <span>{{bsItemObj.name}}：</span>
@@ -167,9 +180,10 @@
             </div>
           </transition>
         </div>
+
       </div>
 
-            
+
       <!-- 搜索结果 -->
       <div class="search-result-content" v-show="searchResultShow">
         <!-- 头部 -->
@@ -189,6 +203,18 @@
           </transition-group>
         </div>
       </div>
+                  
+      <!-- 常用收藏书签 -->
+      <transition name="to-top">
+        <div 
+        class="comom-book-mark" 
+        v-for="(bmItem, indexParent) in bookMark" 
+        v-if="bmItem.name == '常用'"
+        v-show="commonBookMarkShow"
+        >
+          <BookMark :bookMarkArr="bmItem.data"></BookMark>
+        </div>
+      </transition>
     </div>
 
     <!-- 搜索结果页面logo-->
@@ -257,19 +283,7 @@
                   {{bmItem.name}}
                 </div>
                 <div class="submenu-list-box">
-                    <a class="sub-menu-item" draggable="true" target="_blank" :href="bmArr.url" v-for="(bmArr, indexChild) in bmItem.data">
-                      <div class="icon mid-center">
-                        <span class="icon-txt">{{bmArr.icon}}</span>
-                      </div>
-                      <span class="name">{{bmArr.name}}</span>
-                    </a>
-                    <!-- 添加数据 -->
-                    <a class="sub-menu-item" href="javascript:;">
-                      <div class="icon mid-center">
-                        <span class="icon-txt icon-add"></span>
-                      </div>
-                      <span class="name">添加书签</span>
-                    </a>
+                  <BookMark :bookMarkArr="bmItem.data"></BookMark>
                 </div>
               </div>
               <div class="bm-bg-box">
@@ -285,18 +299,99 @@
     </div>
 
     <!-- 下载壁纸 -->
-    <a :href="bgObj.src" target="_blank" class="down-wallpapper mid-center" title="下载壁纸">
+    <a 
+    class="down-wallpapper mid-center" 
+    title="下载壁纸"
+    :href="bgObj.src" 
+    v-show="!searchResultShow"
+    target="_blank" >
       <i class="icon-xiazai"></i>
     </a>
+
+    <!-- 个人 -->
+    <div class="personal"
+      @mouseover="personnalShow = true"
+      @mouseleave="personnalShow = false"
+    >
+      <div class="personal-head mid-center">
+        <i class="icon-deng"></i>
+      </div>
+      <transition name="to-top">
+        <div class="personal-panel" v-show="personnalShow">
+          <div class="uhead">
+            <div class="head min-ccenter" style="backgroundImage:url(http://hackbinimg.luokangyuan.com/20190103110148/1.jpg)">
+              <!-- <img class="head-img" :src="bgObj.src" alt="" srcset=""> -->
+            </div>
+            <div class="umsg">
+              <h3>杉木河水流</h3>
+            </div>
+          </div>
+          <div class="head-bg mid-center">
+            <!-- <div class="bg" :style="{backgroundImage:'url(' +bgObj.src+ ')'}"></div> -->
+            <div class="bg" style="backgroundImage:url(http://hackbinimg.luokangyuan.com/20190103110148/1.jpg)"></div>
+          </div>
+          <div class="u-settings">
+            <ul>
+              <li>
+                <span>
+                  <i class="icon-baidu"></i>
+                  <span class="name" title="是否在搜索栏底下显示常用收藏">常用收藏</span>
+                </span>
+                <MySwitch 
+                  :switchChecked="true" 
+                  :switchName="1"
+                  :switchId="8888888888888888"
+                  ></MySwitch>
+              </li>
+              <li>
+                <span>
+                  <i class="icon-baidu"></i>
+                  <span class="name" title="是否显示侧边收藏夹入口">侧边收藏</span>
+                </span>
+                <MySwitch 
+                  :switchChecked="true" 
+                  :switchName="1"
+                  :switchId="9999999999999999999"
+                  ></MySwitch>
+              </li>
+              <li>
+                <span>
+                  <i class="icon-baidu"></i>
+                  <span class="name" title="是否显示侧边收藏夹入口">编辑收藏</span>
+                </span>
+              </li>
+              <li>
+                <span>
+                  <i class="icon-baidu"></i>
+                  <span class="name" title="是否显示侧边收藏夹入口">编辑搜索引擎</span>
+                </span>
+              </li>
+            </ul>
+          </div>
+          <div class="send-data mid-center">
+            <div class="btn mid-center hover-bg" @click="logOut">
+              退出登录
+            </div>
+            <div class="btn mid-center hover-bg" @click="sendData">
+              同步数据
+            </div>
+          </div>
+        </div>
+      </transition>
+    </div>
   </div>
 </template>
 
 <script>
 import AlertBox from '../src/components/alert.vue'
+import BookMark from '../src/components/bookMark.vue'
+import MySwitch from '../src/components/switch.vue'
 export default {
   name: 'App',
   components: {
-    AlertBox
+    AlertBox,
+    BookMark,
+    MySwitch
   },
   data () {
     return {
@@ -314,6 +409,8 @@ export default {
       searchResultShow: false,
       // 书签子类展示
       subBookMarkShow: false,
+      // 个人页面展示
+      personnalShow: false,
       // 输入框下拉关键词
       searchTipObj: {
         show: false,
@@ -331,6 +428,7 @@ export default {
         {
           active: true, // 是否可用
           current: true, // 是否当前
+          order: 0,
           name:'网页',
           iconName:'icon-wangluo',
           data:[
@@ -338,6 +436,7 @@ export default {
               name: "百度",
               browserUrl: 'https://www.baidu.com/s?wd=',
               resultSrc:'',// 搜索结果的链接
+              order: 0,
               icon: "icon-baidu",
               use: true, // 是否首选项
               active: true, // 是否激活可用状态
@@ -893,18 +992,21 @@ export default {
             {
               name: 'csdn',
               icon: 'csdn',
+              order: 1,
               bgColor:'',
               url:'http://w3more.cn/'
             },
             {
               name: 'vue',
               icon: 'V',
+              order: 2,
               bgColor:'',
               url:'http://w3more.cn/'
             },
             {
               name: 'React',
               icon: 'React',
+              order: 3,
               bgColor:'',
               url:'http://w3more.cn/'
             },
@@ -919,18 +1021,21 @@ export default {
             {
               name: '生活',
               icon: '生活',
+              order: 1,
               bgColor:'',
               url:'http://w3more.cn/'
             },
             {
               name: '生活',
               icon: '生活',
+              order: 2,
               bgColor:'',
               url:'http://w3more.cn/'
             },
             {
               name: '生活',
               icon: '生活',
+              order: 3,
               bgColor:'',
               url:'http://w3more.cn/'
             },
@@ -945,18 +1050,21 @@ export default {
             {
               name: '工作',
               icon: '工作',
+              order: 1,
               bgColor:'',
               url:'http://w3more.cn/'
             },
             {
               name: '工作',
               icon: '工作',
+              order: 2,
               bgColor:'',
               url:'http://w3more.cn/'
             },
             {
               name: '工作',
               icon: '工作',
+              order: 3,
               bgColor:'',
               url:'http://w3more.cn/'
             },
@@ -971,18 +1079,21 @@ export default {
             {
               name: '工作',
               icon: '工作',
+              order: 1,
               bgColor:'',
               url:'http://w3more.cn/'
             },
             {
               name: '工作',
               icon: '工作',
+              order: 2,
               bgColor:'',
               url:'http://w3more.cn/'
             },
             {
               name: '工作',
               icon: '工作',
+              order: 3,
               bgColor:'',
               url:'http://w3more.cn/'
             },
@@ -1023,19 +1134,107 @@ export default {
             {
               name: '工作',
               icon: '工作',
+              order: 1,
               bgColor:'',
               url:'http://w3more.cn/'
             },
             {
               name: '工作',
               icon: '工作',
+              order: 2,
               bgColor:'',
               url:'http://w3more.cn/'
             },
             {
               name: '工作',
               icon: '工作',
+              order: 3,
               bgColor:'',
+              url:'http://w3more.cn/'
+            },
+          ]
+        },
+        {
+          name:'常用',
+          icon:'icon-gongzuo',
+          order:'6',
+          show: false,
+          data: [
+            {
+              name: 'html教程',
+              icon: 'html教程',
+              order: 1,
+              bgColor:'red',
+              url:'http://w3more.cn/'
+            },
+            {
+              name: '常用',
+              icon: '常用',
+              order: 2,
+              bgColor:'blue',
+              url:'http://w3more.cn/'
+            },
+            {
+              name: '常用',
+              icon: '常用',
+              order: 3,
+              bgColor:'green',
+              url:'http://w3more.cn/'
+            },
+            {
+              name: '常用',
+              icon: '常用',
+              order: 4,
+              bgColor:'yellow',
+              url:'http://w3more.cn/'
+            },
+            {
+              name: '常用',
+              icon: '常用',
+              order: 5,
+              bgColor:'purple',
+              url:'http://w3more.cn/'
+            },
+            {
+              name: '常用',
+              icon: '常用',
+              order: 6,
+              bgColor:'black',
+              url:'http://w3more.cn/'
+            },
+            {
+              name: '常用',
+              icon: '常用',
+              order: 7,
+              bgColor:'green',
+              url:'http://w3more.cn/'
+            },
+            {
+              name: '常用',
+              icon: '常用',
+              order: 8,
+              bgColor:'blue',
+              url:'http://w3more.cn/'
+            },
+            {
+              name: '常用',
+              icon: '常用',
+              order: 9,
+              bgColor:'red',
+              url:'http://w3more.cn/'
+            },
+            {
+              name: '常用',
+              icon: '常用',
+              order: 10,
+              bgColor:'gray',
+              url:'http://w3more.cn/'
+            },
+            {
+              name: '常用',
+              icon: '常用',
+              order: 11,
+              bgColor:'orange',
               url:'http://w3more.cn/'
             },
           ]
@@ -1156,11 +1355,11 @@ export default {
     },
 
     // 选中百度提示
-    selectTip (index) {
-      this.searchTxt = this.searchTipObj.data[index];
-      this.searchNow();
+    selectTip (indexParent, indexChild) {
+      this.searchTxt = this.searchTipObj.data[indexChild];
+      this.searchNow(indexParent);
       this.searchTipObj.show = false;
-      this.searchTipObj.nowIndex = index;
+      this.searchTipObj.nowIndex = indexChild;
     },
 
 
@@ -1210,11 +1409,20 @@ export default {
       }
     },
 
-    // 跳转书签
-    toBookMark(indexParent, indexChild) {
-      console.log(
-        this.bookMark[indexParent].data[indexChild].url
-      )
+    // 同步数据
+    sendData () {
+      alert('同步成功')
+    },
+
+    // 退出登录
+    logOut () {
+
+    }
+  },
+  computed: {
+    // 是否展示常用书签
+    commonBookMarkShow: function () {
+      return !(this.inputFocusBool || this.searchResultShow);
     }
   },
   // 判断移动端
@@ -1228,10 +1436,7 @@ export default {
     this.$http.jsonp('http://bing.ioliu.cn/v1',
       {
         // params:{
-        //   d: 1,
-        //   w: 1920,
-        //   h: 1080,
-        //   r: 20
+        //   d: 4,
         // },
         jsonp:'callback'
       })
@@ -1333,7 +1538,7 @@ export default {
           background: rgba(255, 255, 255, .5);
           box-shadow: 0 0 30px rgb(255, 255, 255) inset;
           line-height: 40px;
-          padding: 0 40px 0 30px;
+          padding: 0 40px 0 10px;
           transition:@animateTime;
           font-size: 16px;
           float: left;
@@ -1654,6 +1859,58 @@ export default {
             background-color: #f1f1f1;
             color: @main-color;
           }
+        }
+      }
+    }
+    .comom-book-mark{
+      position: fixed;
+      left: 50%;
+      // top: calc(~'40vh + 60px');
+      top: 50vh;
+      margin-left: -320px - 4px; // 减去item的margin
+      width: 648px + 4px + 13px; // 加上两边margin + 滚动条
+      height: 216px;
+      overflow-y: auto;
+      // background: #dedede;
+      display: flex;
+      flex-wrap: wrap;
+      .item{
+        width: 100px;
+        height:100px;
+        margin-left: 8px;
+        margin-bottom: 8px;
+        background: rgba(0, 0, 0, 0.3);
+        cursor: pointer;
+        transition: @animateTime;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transition: @animateTime;
+        user-select: none;
+        text-decoration: none;
+        .icon{
+          width: 55px;
+          height: 55px;
+          border-radius: 50%;
+          background: rgba(0, 0, 0, 0.322);
+          .icon-txt{
+            color: #fff;
+          }
+        }
+        .name{
+          color:#fff;
+          margin-top: 5px;
+        }
+        &:active{
+          transform: scale(.9);
+        }
+        &:hover{
+          background: rgba(48, 48, 48, 0.3);
+          box-shadow: @box-shadow;
+        }
+        &:nth-child(6n + 1){
+          margin-left: 0;
         }
       }
     }
@@ -1992,9 +2249,132 @@ export default {
     width: 40px;
     height:40px;
     border-radius: 50%;
-    color: rgb(216, 216, 216);
-    background: rgba(0, 0, 0, 0.8);
+    opacity: 0.5;
+    color: rgb(255, 255, 255);
+    background: rgb(0, 0, 0);
     cursor: pointer;
+    transition: @animateTime;
+    &:hover{
+      opacity: .8;
+    }
+  }
+  .personal{
+    position: fixed;
+    top:10px;
+    right:10px;
+    z-index: 100;
+    .personal-head{
+      position: absolute;
+      right: 0px;
+      width: 40px;
+      height:40px;
+      border-radius: 50%;
+      color: rgb(255, 255, 255);
+      background: rgb(0, 0, 0);
+      cursor: pointer; 
+      cursor: poinrgba(0, 0, 0, 0.7)
+    }
+    .personal-panel{
+      position: absolute;
+      right: 0px;
+      top:50px;
+      width:350px;
+      background: rgb(255, 255, 255);
+      padding: 40px 40px 30px;
+      box-shadow: @box-shadow;
+      .uhead{
+        position: relative;
+        z-index: 20;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        .head{
+          width:150px;
+          height:150px;
+          border-radius: 100%;
+          overflow: hidden;
+          background-size: cover;
+          background-position: center;
+          background-repeat: no-repeat;
+          border: 5px solid rgba(148, 148, 148, 0.719);
+        }
+        .umsg{
+          margin-top: 10px;
+          color: #fff;
+          text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+      }
+      .head-bg{
+        position: absolute;
+        z-index: 10;
+        top:0;
+        left:0;
+        width:100%;
+        height: 250px;
+        overflow: hidden;
+        // background: #fff;
+        .bg{
+          width: 300px;
+          height: 250PX;
+          transform: scale(1.3);
+          background-size: cover;
+          background-position: center;
+          background-repeat: no-repeat;
+          filter: blur(25px) brightness(1.5);
+        }
+      }
+      .u-settings{
+        position: relative;
+        margin-top: 30px;
+        width:100%;
+        >ul{
+          width:100%;
+          >li{
+            width:100%;
+            height:40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            list-style: none;
+            user-select: none;
+            &:not(:last-child){
+              border-bottom: 1px dotted #dedede;
+            }
+            // background: #dedede;
+            .name{
+              margin-left: 5px;
+              color: @main-txt-color;
+              font-weight: bold;
+            }
+            .des{
+              margin-left: 3px;
+              font-size: 12px;
+              color: #acacac;
+            }
+          }
+        }
+      }
+      .send-data{
+        width:100%;
+        margin-top: 10px;
+        justify-content: space-around;
+        .btn{
+          width:100px;
+          height:40px;
+          border-radius: 20px;
+          background: @main-color;
+          color:#fff;
+          font-weight: bold;
+          user-select: none;
+          box-shadow: @box-shadow;
+          cursor: pointer;
+          &:active{
+            transform: scale(.95);
+          }
+        }
+      }
+    }
   }
 }
 </style>
