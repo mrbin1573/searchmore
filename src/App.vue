@@ -130,6 +130,7 @@
                 :switchChecked="bsItemObj.active" 
                 :switchName="bsItemObj.name"
                 :switchId="indexParent"
+                :fun="selectobj(indexParent)"
                 ></MySwitch>
                 <!-- <div class="switch-obj">
                   <input class="switch-btn" type="checkbox" 
@@ -252,51 +253,58 @@
     <AlertBox :alertObj="alertObj"></AlertBox>
 
     <!-- 书签 -->
-    <div class="book-mark" @mouseover="subBookMarkShow = true" @mouseleave="subBookMarkShow = false">
-      <div class="bm-content">
-        <div class="triggrt">
-          <i class="icon-you"></i>
-        </div>
-        <!-- 大类列表 -->
-        <div class="bm-list-box">
-          <ul class="bm-list">
-            <li  
-            draggable="true" 
-            class="bm-item hover-bg" 
-            v-for="(bmItem, index) in bookMark" 
-            @mouseover="hoverBookMark(index)"
-            :style="{order:bmItem.order}"
-            >
-              <div class="touch icon-tuodong"></div>
-              <i :class="bmItem.icon"></i>
-              <span class="menu-name">{{bmItem.name}}</span>
-            </li>
-          </ul>
-        </div>
+    <transition name="opacityShow">
+      <div class="book-mark" 
+      @mouseover="subBookMarkShow = true" 
+      @mouseleave="subBookMarkShow = false"
+      v-show="this.$store.state.sideBookMarkShowState"
+      >
+        <div class="bm-content">
+          <div class="triggrt">
+            <i class="icon-you"></i>
+          </div>
+          <!-- 大类列表 -->
+          <div class="bm-list-box">
+            <ul class="bm-list">
+              <li  
+              draggable="true" 
+              class="bm-item hover-bg" 
+              v-for="(bmItem, index) in bookMark" 
+              @mouseover="hoverBookMark(index)"
+              :style="{order:bmItem.order}"
+              >
+                <div class="touch icon-tuodong"></div>
+                <i :class="bmItem.icon"></i>
+                <span class="menu-name">{{bmItem.name}}</span>
+              </li>
+            </ul>
+          </div>
 
-        <!-- 子类弹出框 -->
-        <transition name="opacityShow">
-          <div class="sub-list-content" v-show="subBookMarkShow">
-            <div class="sub-list-box" :class="{whitebg: searchResultShow}">
-              <div class="content-box" v-for="(bmItem, indexParent) in bookMark" v-show="bmItem.show">
-                <div class="sub-box-title">
-                  {{bmItem.name}}
+          <!-- 子类弹出框 -->
+          <transition name="opacityShow">
+            <div class="sub-list-content" v-show="subBookMarkShow">
+              <div class="sub-list-box" :class="{whitebg: searchResultShow}">
+                <div class="content-box" v-for="(bmItem, indexParent) in bookMark" v-show="bmItem.show">
+                  <div class="sub-box-title">
+                    {{bmItem.name}}
+                  </div>
+                  <div class="submenu-list-box">
+                    <BookMark :bookMarkArr="bmItem.data"></BookMark>
+                  </div>
                 </div>
-                <div class="submenu-list-box">
-                  <BookMark :bookMarkArr="bmItem.data"></BookMark>
+                <div class="bm-bg-box">
+                  <div class="bm-bg" v-show="!searchResultShow" :style="{backgroundImage: 'url(' +bgObj.src+ ')'}"></div>
                 </div>
-              </div>
-              <div class="bm-bg-box">
-                <div class="bm-bg" v-show="!searchResultShow" :style="{backgroundImage: 'url(' +bgObj.src+ ')'}"></div>
               </div>
             </div>
-          </div>
-        </transition>
+          </transition>
+        </div>
+        <!-- <div class="bm-bg-box">
+          <div class="bm-bg" :style="{backgroundImage: 'url(' +bgObj.src+ ')'}"></div>
+        </div> -->
       </div>
-      <!-- <div class="bm-bg-box">
-        <div class="bm-bg" :style="{backgroundImage: 'url(' +bgObj.src+ ')'}"></div>
-      </div> -->
-    </div>
+    </transition>
+
 
     <!-- 下载壁纸 -->
     <a 
@@ -312,9 +320,11 @@
     <div class="personal"
       @mouseover="personnalShow = true"
       @mouseleave="personnalShow = false"
+      v-show="!searchResultShow"
     >
       <div class="personal-head mid-center">
-        <i class="icon-deng"></i>
+        <!-- <i class="icon-deng"></i> -->
+        <img class="rukou" src="http://hackbinimg.luokangyuan.com/20180823130882/logowhite.gif" alt="" srcset="">
       </div>
       <transition name="to-top">
         <div class="personal-panel" v-show="personnalShow">
@@ -334,35 +344,37 @@
             <ul>
               <li>
                 <span>
-                  <i class="icon-baidu"></i>
+                  <i class="icon-bookmark"></i>
                   <span class="name" title="是否在搜索栏底下显示常用收藏">常用收藏</span>
                 </span>
                 <MySwitch 
                   :switchChecked="true" 
                   :switchName="1"
                   :switchId="8888888888888888"
+                  :fun="switchCommonBookMark"
                   ></MySwitch>
               </li>
               <li>
                 <span>
-                  <i class="icon-baidu"></i>
+                  <i class="icon-bookmarks"></i>
                   <span class="name" title="是否显示侧边收藏夹入口">侧边收藏</span>
                 </span>
                 <MySwitch 
                   :switchChecked="true" 
                   :switchName="1"
                   :switchId="9999999999999999999"
+                  :fun="switchSideBookMark"
                   ></MySwitch>
               </li>
-              <li>
+              <li class="cuosor_p hover-eff">
                 <span>
-                  <i class="icon-baidu"></i>
+                  <i class="icon-quill"></i>
                   <span class="name" title="是否显示侧边收藏夹入口">编辑收藏</span>
                 </span>
               </li>
-              <li>
+              <li class="cuosor_p hover-eff">
                 <span>
-                  <i class="icon-baidu"></i>
+                  <i class="icon-IE"></i>
                   <span class="name" title="是否显示侧边收藏夹入口">编辑搜索引擎</span>
                 </span>
               </li>
@@ -372,7 +384,7 @@
             <div class="btn mid-center hover-bg" @click="logOut">
               退出登录
             </div>
-            <div class="btn mid-center hover-bg" @click="sendData">
+            <div class="btn mid-center save-data" @click="sendData">
               同步数据
             </div>
           </div>
@@ -401,16 +413,22 @@ export default {
         src: ''
         // src: 'http://hackbinimg.luokangyuan.com/searchmore/bg1.jpg'
       },
+
       // 输入框聚焦
       inputFocusBool: false,
+      
       // 控制设置面板显示
       setPanelShow: false,
+
       // 搜索结果展示
       searchResultShow: false,
+
       // 书签子类展示
       subBookMarkShow: false,
+
       // 个人页面展示
       personnalShow: false,
+
       // 输入框下拉关键词
       searchTipObj: {
         show: false,
@@ -1394,8 +1412,8 @@ export default {
     },
 
     // 激活、取消大类
-    selectObj (indexParent) {
-      this.browserArr[indexParent].active = !this.browserArr[indexParent].active;
+    selectobj (indexParent) {
+      // this.browserArr[indexParent].active = !this.browserArr[indexParent].active;
     },
 
     // 鼠标覆盖变迁大类
@@ -1411,18 +1429,28 @@ export default {
 
     // 同步数据
     sendData () {
-      alert('同步成功')
+      this.$store.commit('changeBookMarkShow');
     },
 
     // 退出登录
     logOut () {
 
+    },
+
+    // 切换常用书签
+    switchCommonBookMark() {
+      this.$store.commit('changeBookMarkShow');
+    },
+    // 切换侧边书签
+    switchSideBookMark () {
+      this.$store.commit('changeSlideBookMarkShow');
     }
   },
   computed: {
     // 是否展示常用书签
     commonBookMarkShow: function () {
-      return !(this.inputFocusBool || this.searchResultShow);
+      return !(this.inputFocusBool || this.searchResultShow) && this.$store.state.commonBookMarkShowState;
+      // return this.$store.state.commonBookMarkShowState;
     }
   },
   // 判断移动端
@@ -1735,7 +1763,7 @@ export default {
               }
             }
             .obj-name{
-              margin-left: 40px;
+              margin-left: 5px;
               height:30px;
               line-height:30px;
               display: flex;
@@ -2265,19 +2293,21 @@ export default {
     z-index: 100;
     .personal-head{
       position: absolute;
-      right: 0px;
+      right: 0;
       width: 40px;
       height:40px;
       border-radius: 50%;
       color: rgb(255, 255, 255);
-      background: rgb(0, 0, 0);
+      background: rgba(0, 0, 0, 0.5);
       cursor: pointer; 
-      cursor: poinrgba(0, 0, 0, 0.7)
+      cursor: poinrgba(0, 0, 0, 0.7);
+      .rukou{
+        width:20px;
+      }
     }
     .personal-panel{
-      position: absolute;
-      right: 0px;
-      top:50px;
+      position: relative;
+      margin-top: 50px;
       width:350px;
       background: rgb(255, 255, 255);
       padding: 40px 40px 30px;
@@ -2369,6 +2399,9 @@ export default {
           user-select: none;
           box-shadow: @box-shadow;
           cursor: pointer;
+          &.save-data{
+            background: @main-green;
+          }
           &:active{
             transform: scale(.95);
           }

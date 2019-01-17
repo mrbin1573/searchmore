@@ -33,6 +33,15 @@
   transform: translateX(15px);
   opacity: 0;
 }
+.to-right-enter-active,
+.to-right-leave-active {
+  transition: all 0.3s;
+}
+.to-right-enter,
+.to-right-leave-to {
+  transform: translateX(-15px);
+  opacity: 0;
+}
 /* 清除浮动 */
 .clearfix {
   *zoom: 1;
@@ -79,4 +88,7 @@
 ::-webkit-scrollbar-thumb {
   border-radius: 2px;
   background-color: #4e4e4e;
+}
+.cuosor_p {
+  cursor: pointer;
 }

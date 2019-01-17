@@ -9,7 +9,8 @@
         :href="bmItem.url"
         @click.prevent.right="editBookMarkItem"
       >
-        <div class="icon mid-center" :style="{background: bmItem.bgColor}">
+        <!-- <div class="icon mid-center" :style="{background: bmItem.bgColor}"> -->
+        <div class="icon mid-center" :style="{background: colorArr[index]}">
           <span class="icon-txt" :class="bmItem.icon">{{bmItem.icon}}</span>
         </div>
         <span class="name">{{bmItem.name}}</span>
@@ -40,7 +41,25 @@ export default {
   props: ["bookMarkArr"],
   data(){
     return {
-      editShow: false
+      editShow: false,
+      colorArr: [
+        '#663ab6',
+        '#00bbd3',
+        '#f34236',
+        '#9b27af',
+        '#2195f2',
+        '#009587',
+        '#4bae4f',
+        '#fe9700',
+        '#fe5622',
+        '#3e50b4',
+        '#ccdb39',
+        '#fe5622',
+        '#fec007',
+        '#03a8f3',
+        '#8ac249',
+        '#5f7c8a',
+      ]
     }
   },
   methods: {
@@ -106,8 +125,9 @@ export default {
     transform: scale(0.9);
   }
   &:hover {
-    background: rgba(48, 48, 48, 0.3);
+    background: rgba(0, 0, 0, 0.507);
     box-shadow: @box-shadow;
+    border: 2px solid rgba(0, 0, 0, 0.13);
   }
 }
 </style>

@@ -8,7 +8,7 @@
 <script>
 export default {
   name: "swicth",
-  props: ["switchChecked", "switchName", "switchId"],
+  props: ["switchChecked", "switchName", "switchId", "fun"],
   data(){
     return {
       editShow: false
@@ -16,7 +16,8 @@ export default {
   },
   methods: {
     selectClick: function () {
-
+      // this.$emit("fun")
+      this.fun();
     }
   }
 };
@@ -35,7 +36,7 @@ export default {
   .switch-btn{
     opacity: 0;
     &:checked+.switch-btn-label{
-      background:#11d8c7;
+      background:@main-green;
       &::after{
         left:23px;
       }
