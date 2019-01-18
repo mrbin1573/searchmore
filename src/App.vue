@@ -452,7 +452,7 @@ export default {
           name:'网页',
           iconName:'icon-wangluo',// 已弃用
           active: true, // 是否可用
-          current: true, // 是否当前
+          current: true, // 是否当前搜索的项，不用传递到后台
           order: 0,
           data:[
             {
@@ -461,7 +461,6 @@ export default {
               resultSrc:'',// 搜索结果的链接
               order: 0,
               icon: "icon-baidu",
-              use: true, // 是否首选项
               active: true, // 是否激活可用状态
               current: true, // 是否为当前选中显示搜索结果页面
               iconColor: "#3385ff", // 图标颜色
@@ -470,10 +469,9 @@ export default {
             },
             {
               name: "谷歌",
-              browserUrl: 'https://google.suanfazu.com/search/?q=',
+              browserUrl: 'https://www.google.com/search?q=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-google",
-              use: false,
               active: true,
               current: false,
               iconColor: "rgb(251, 188, 5)",
@@ -487,7 +485,7 @@ export default {
               browserUrl: 'https://www.so.com/s?q=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-360",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#1bc550",
@@ -499,7 +497,7 @@ export default {
               resultSrc:'',
               icon: "icon-sougou",
               bgColor: "background: #f84a19",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#f84a19",
@@ -510,7 +508,7 @@ export default {
               browserUrl: 'https://cn.bing.com/search?q=',
               resultSrc:'',
               icon: "icon-bing",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#007daa",
@@ -544,7 +542,7 @@ export default {
               browserUrl: 'https://google.suanfazu.com/search/?q=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-google",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "rgb(251, 188, 5)",
@@ -558,7 +556,7 @@ export default {
               browserUrl: 'http://image.so.com/i?q=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-360",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#1bc550",
@@ -570,7 +568,7 @@ export default {
               resultSrc:'',
               icon: "icon-sougou",
               bgColor: "background: #f84a19",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#f84a19",
@@ -581,7 +579,7 @@ export default {
               browserUrl: 'https://cn.bing.com/images/search?q=',
               resultSrc:'',
               icon: "icon-bing",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#007daa",
@@ -615,7 +613,7 @@ export default {
               browserUrl: 'https://google.suanfazu.com/search/?q=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-google",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "rgb(251, 188, 5)",
@@ -629,7 +627,7 @@ export default {
               browserUrl: 'https://www.so.com/s?q=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-360",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#1bc550",
@@ -641,7 +639,7 @@ export default {
               resultSrc:'',
               icon: "icon-sougou",
               bgColor: "background: #f84a19",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#f84a19",
@@ -652,7 +650,7 @@ export default {
               browserUrl: 'https://cn.bing.com/search?q=',
               resultSrc:'',
               icon: "icon-bing",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#007daa",
@@ -686,7 +684,7 @@ export default {
               browserUrl: 'https://google.suanfazu.com/search/?q=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-google",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "rgb(251, 188, 5)",
@@ -700,7 +698,7 @@ export default {
               browserUrl: 'https://www.so.com/s?q=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-360",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#1bc550",
@@ -712,7 +710,7 @@ export default {
               resultSrc:'',
               icon: "icon-sougou",
               bgColor: "background: #f84a19",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#f84a19",
@@ -723,7 +721,7 @@ export default {
               browserUrl: 'https://cn.bing.com/search?q=',
               resultSrc:'',
               icon: "icon-bing",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#007daa",
@@ -757,7 +755,7 @@ export default {
               browserUrl: 'https://google.suanfazu.com/search/?q=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-google",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "rgb(251, 188, 5)",
@@ -771,7 +769,7 @@ export default {
               browserUrl: 'https://www.so.com/s?q=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-360",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#1bc550",
@@ -783,7 +781,7 @@ export default {
               resultSrc:'',
               icon: "icon-sougou",
               bgColor: "background: #f84a19",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#f84a19",
@@ -794,7 +792,7 @@ export default {
               browserUrl: 'https://cn.bing.com/search?q=',
               resultSrc:'',
               icon: "icon-bing",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#007daa",
@@ -828,7 +826,7 @@ export default {
               browserUrl: 'https://google.suanfazu.com/search/?q=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-google",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "rgb(251, 188, 5)",
@@ -842,7 +840,7 @@ export default {
               browserUrl: 'https://www.so.com/s?q=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-360",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#1bc550",
@@ -854,7 +852,7 @@ export default {
               resultSrc:'',
               icon: "icon-sougou",
               bgColor: "background: #f84a19",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#f84a19",
@@ -865,7 +863,7 @@ export default {
               browserUrl: 'https://cn.bing.com/search?q=',
               resultSrc:'',
               icon: "icon-bing",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#007daa",
@@ -899,7 +897,7 @@ export default {
               browserUrl: 'https://google.suanfazu.com/search/?q=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-google",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "rgb(251, 188, 5)",
@@ -913,7 +911,7 @@ export default {
               browserUrl: 'https://www.so.com/s?q=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-360",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#1bc550",
@@ -925,7 +923,7 @@ export default {
               resultSrc:'',
               icon: "icon-sougou",
               bgColor: "background: #f84a19",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#f84a19",
@@ -936,7 +934,7 @@ export default {
               browserUrl: 'https://cn.bing.com/search?q=',
               resultSrc:'',
               icon: "icon-bing",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#007daa",
@@ -950,7 +948,7 @@ export default {
               browserUrl: 'https://cn.bing.com/search?q=',
               resultSrc:'',
               icon: "icon-bing",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#007daa",
@@ -964,7 +962,7 @@ export default {
               browserUrl: 'https://cn.bing.com/search?q=',
               resultSrc:'',
               icon: "icon-bing",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#007daa",
@@ -978,7 +976,7 @@ export default {
               browserUrl: 'https://cn.bing.com/search?q=',
               resultSrc:'',
               icon: "icon-bing",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#007daa",
@@ -992,7 +990,7 @@ export default {
               browserUrl: 'https://cn.bing.com/search?q=',
               resultSrc:'',
               icon: "icon-bing",
-              use: false,
+              
               active: true,
               current: false,
               iconColor: "#007daa",
