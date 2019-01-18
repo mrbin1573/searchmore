@@ -15,7 +15,7 @@
           :class="{afterSearch:searchResultShow}"
           ref="inputbox" 
           v-for="(searchObj, indexParent) in browserArr" 
-          v-if="searchObj.current"
+          v-if="searchObj.order == 0"
           v-model="searchTxt"
           @keyup.enter="inputEnter(indexParent)"
           @input="getBaidu"
@@ -328,6 +328,7 @@
       </div>
       <transition name="to-top">
         <div class="personal-panel" v-show="personnalShow">
+          <!-- 头像 -->
           <div class="uhead">
             <div class="head min-ccenter" style="backgroundImage:url(http://hackbinimg.luokangyuan.com/20190103110148/1.jpg)">
               <!-- <img class="head-img" :src="bgObj.src" alt="" srcset=""> -->
@@ -336,10 +337,12 @@
               <h3>杉木河水流</h3>
             </div>
           </div>
+          <!-- 模糊背景 -->
           <div class="head-bg mid-center">
             <!-- <div class="bg" :style="{backgroundImage:'url(' +bgObj.src+ ')'}"></div> -->
             <div class="bg" style="backgroundImage:url(http://hackbinimg.luokangyuan.com/20190103110148/1.jpg)"></div>
           </div>
+          <!-- 设置列表 -->
           <div class="u-settings">
             <ul>
               <li>
@@ -368,29 +371,31 @@
               </li>
               <li class="cuosor_p hover-eff">
                 <span>
-                  <i class="icon-quill"></i>
-                  <span class="name" title="是否显示侧边收藏夹入口">编辑收藏</span>
-                </span>
-              </li>
-              <li class="cuosor_p hover-eff">
-                <span>
-                  <i class="icon-IE"></i>
-                  <span class="name" title="是否显示侧边收藏夹入口">编辑搜索引擎</span>
+                  <i class="icon-cogs"></i>
+                  <span class="name" title="是否显示侧边收藏夹入口">超级设置</span>
                 </span>
               </li>
             </ul>
           </div>
+          <!-- 按钮 -->
           <div class="send-data mid-center">
-            <div class="btn mid-center hover-bg" @click="logOut">
-              退出登录
+            <div class="btn mid-center" @click="logOut">
+              备份数据
             </div>
             <div class="btn mid-center save-data" @click="sendData">
-              同步数据
+              恢复数据
             </div>
+          </div>
+          <!-- 退出登录 -->
+          <div class="u-logout">
+            <i class="icon-switch"></i>
+            <span>登出</span>
           </div>
         </div>
       </transition>
     </div>
+
+    <!-- 超级设置页面 -->
   </div>
 </template>
 
@@ -427,7 +432,7 @@ export default {
       subBookMarkShow: false,
 
       // 个人页面展示
-      personnalShow: false,
+      personnalShow: true,
 
       // 输入框下拉关键词
       searchTipObj: {
@@ -444,11 +449,11 @@ export default {
       // 搜索引擎列表
       browserArr: [
         {
+          name:'网页',
+          iconName:'icon-wangluo',// 已弃用
           active: true, // 是否可用
           current: true, // 是否当前
           order: 0,
-          name:'网页',
-          iconName:'icon-wangluo',
           data:[
             {
               name: "百度",
@@ -1011,21 +1016,21 @@ export default {
               name: 'csdn',
               icon: 'csdn',
               order: 1,
-              bgColor:'',
+              style:'',
               url:'http://w3more.cn/'
             },
             {
               name: 'vue',
               icon: 'V',
               order: 2,
-              bgColor:'',
+              style:'',
               url:'http://w3more.cn/'
             },
             {
               name: 'React',
               icon: 'React',
               order: 3,
-              bgColor:'',
+              style:'',
               url:'http://w3more.cn/'
             },
           ]
@@ -1040,21 +1045,21 @@ export default {
               name: '生活',
               icon: '生活',
               order: 1,
-              bgColor:'',
+              style:'',
               url:'http://w3more.cn/'
             },
             {
               name: '生活',
               icon: '生活',
               order: 2,
-              bgColor:'',
+              style:'',
               url:'http://w3more.cn/'
             },
             {
               name: '生活',
               icon: '生活',
               order: 3,
-              bgColor:'',
+              style:'',
               url:'http://w3more.cn/'
             },
           ]
@@ -1069,21 +1074,21 @@ export default {
               name: '工作',
               icon: '工作',
               order: 1,
-              bgColor:'',
+              style:'',
               url:'http://w3more.cn/'
             },
             {
               name: '工作',
               icon: '工作',
               order: 2,
-              bgColor:'',
+              style:'',
               url:'http://w3more.cn/'
             },
             {
               name: '工作',
               icon: '工作',
               order: 3,
-              bgColor:'',
+              style:'',
               url:'http://w3more.cn/'
             },
           ]
@@ -1098,7 +1103,7 @@ export default {
               name: '工作',
               icon: '工作',
               order: 1,
-              bgColor:'',
+              style:'',
               url:'http://w3more.cn/'
             },
             {
@@ -1112,7 +1117,7 @@ export default {
               name: '工作',
               icon: '工作',
               order: 3,
-              bgColor:'',
+              style:'',
               url:'http://w3more.cn/'
             },
           ]
@@ -1126,19 +1131,19 @@ export default {
             {
               name: '工作',
               icon: '工作',
-              bgColor:'',
+              style:'',
               url:'http://w3more.cn/'
             },
             {
               name: '工作',
               icon: '工作',
-              bgColor:'',
+              style:'',
               url:'http://w3more.cn/'
             },
             {
               name: '工作',
               icon: '工作',
-              bgColor:'',
+              style:'',
               url:'http://w3more.cn/'
             },
           ]
@@ -1153,21 +1158,21 @@ export default {
               name: '工作',
               icon: '工作',
               order: 1,
-              bgColor:'',
+              style:'',
               url:'http://w3more.cn/'
             },
             {
               name: '工作',
               icon: '工作',
               order: 2,
-              bgColor:'',
+              style:'',
               url:'http://w3more.cn/'
             },
             {
               name: '工作',
               icon: '工作',
               order: 3,
-              bgColor:'',
+              style:'',
               url:'http://w3more.cn/'
             },
           ]
@@ -1182,77 +1187,77 @@ export default {
               name: 'html教程',
               icon: 'html教程',
               order: 1,
-              bgColor:'red',
+              style:'red',
               url:'http://w3more.cn/'
             },
             {
               name: '常用',
               icon: '常用',
               order: 2,
-              bgColor:'blue',
+              style:'blue',
               url:'http://w3more.cn/'
             },
             {
               name: '常用',
               icon: '常用',
               order: 3,
-              bgColor:'green',
+              style:'green',
               url:'http://w3more.cn/'
             },
             {
               name: '常用',
               icon: '常用',
               order: 4,
-              bgColor:'yellow',
+              style:'yellow',
               url:'http://w3more.cn/'
             },
             {
               name: '常用',
               icon: '常用',
               order: 5,
-              bgColor:'purple',
+              style:'purple',
               url:'http://w3more.cn/'
             },
             {
               name: '常用',
               icon: '常用',
               order: 6,
-              bgColor:'black',
+              style:'black',
               url:'http://w3more.cn/'
             },
             {
               name: '常用',
               icon: '常用',
               order: 7,
-              bgColor:'green',
+              style:'green',
               url:'http://w3more.cn/'
             },
             {
               name: '常用',
               icon: '常用',
               order: 8,
-              bgColor:'blue',
+              style:'blue',
               url:'http://w3more.cn/'
             },
             {
               name: '常用',
               icon: '常用',
               order: 9,
-              bgColor:'red',
+              style:'red',
               url:'http://w3more.cn/'
             },
             {
               name: '常用',
               icon: '常用',
               order: 10,
-              bgColor:'gray',
+              style:'gray',
               url:'http://w3more.cn/'
             },
             {
               name: '常用',
               icon: '常用',
               order: 11,
-              bgColor:'orange',
+              style:'orange',
               url:'http://w3more.cn/'
             },
           ]
@@ -2393,7 +2398,7 @@ export default {
           width:100px;
           height:40px;
           border-radius: 20px;
-          background: @main-color;
+          background: @main-blue;
           color:#fff;
           font-weight: bold;
           user-select: none;
@@ -2405,6 +2410,19 @@ export default {
           &:active{
             transform: scale(.95);
           }
+        }
+      }
+      .u-logout{
+        position:absolute;
+        top:10px;
+        right: 10px;
+        z-index: 10;
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.616);
+        cursor:pointer;
+        transition: @animateTime;
+        &:hover{
+          color: rgb(255, 255, 255);
         }
       }
     }
