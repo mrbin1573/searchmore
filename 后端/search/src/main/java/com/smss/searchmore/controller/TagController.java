@@ -5,8 +5,8 @@ import com.smss.searchmore.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.util.Map;
 
@@ -17,7 +17,8 @@ import java.util.Map;
  *@Date 2019-1-18 14:35
  *@Version 1.0.0
  */
-@Controller
+@RestController
+@EnableSwagger2
 @RequestMapping(value = "api/v1/tag", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 public class TagController {
 
