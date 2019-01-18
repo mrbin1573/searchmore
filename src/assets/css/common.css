@@ -24,6 +24,24 @@
   transform: translateY(-15px);
   opacity: 0;
 }
+.to-left-enter-active,
+.to-left-leave-active {
+  transition: all 0.3s;
+}
+.to-left-enter,
+.to-left-leave-to {
+  transform: translateX(15px);
+  opacity: 0;
+}
+.to-right-enter-active,
+.to-right-leave-active {
+  transition: all 0.3s;
+}
+.to-right-enter,
+.to-right-leave-to {
+  transform: translateX(-15px);
+  opacity: 0;
+}
 /* 清除浮动 */
 .clearfix {
   *zoom: 1;
@@ -42,4 +60,35 @@
   margin: 0;
   box-sizing: border-box;
   font-family: "微软雅黑";
+}
+.hover-bg {
+  transition: 0.3s;
+}
+.hover-bg:hover {
+  background: #cc1212 !important;
+}
+.txtUnavtive {
+  color: #7a7a7a !important;
+  text-decoration: line-through;
+}
+.mid-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+  border-radius: 2px;
+  background-color: rgba(245, 245, 245, 0.3);
+}
+/*定义滚动条轨道 内阴影+圆角*/
+/*定义滑块 内阴影+圆角*/
+::-webkit-scrollbar-thumb {
+  border-radius: 2px;
+  background-color: #4e4e4e;
+}
+.cuosor_p {
+  cursor: pointer;
 }
