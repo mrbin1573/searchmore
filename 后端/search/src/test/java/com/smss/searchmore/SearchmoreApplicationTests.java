@@ -1,5 +1,6 @@
 package com.smss.searchmore;
 
+import com.smss.searchmore.pojo.Tag;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,6 +12,8 @@ public class SearchmoreApplicationTests {
 
 	@Test
 	public void contextLoads() {
+		Tag tag = new Tag();
+		tag.setCode("");
 	}
 
 }

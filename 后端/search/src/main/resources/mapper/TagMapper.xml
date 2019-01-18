@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.smss.searchmore.mapper.TagMapper" >
+    <resultMap id="tagMap" type="com.smss.searchmore.pojo.Tag">
+        <id column="c_code" jdbcType="VARCHAR" property="code"/>
+        <result column="c_name" jdbcType="VARCHAR" property="name"/>
+    </resultMap>
+
+    <select id="getTags"  resultMap="tagMap">
+       select * from tags;
+    </select>
+    <select id="getTag" resultMap="tagMap" parameterType="string">
+        select * from tags  where c_code = #{code}
+    </select>
+
+
+</mapper>
