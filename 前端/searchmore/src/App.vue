@@ -316,10 +316,10 @@
       <i class="icon-xiazai"></i>
     </a>
 
-    <!-- 个人 -->
+    <!-- 个人  @mouseover="personnalShow = true"
+      @mouseleave="personnalShow = false"-->
     <div class="personal"
-      @mouseover="personnalShow = true"
-      @mouseleave="personnalShow = false"
+     
       v-show="!searchResultShow"
     >
       <div class="personal-head mid-center">
@@ -330,25 +330,28 @@
         <div class="personal-panel" v-show="personnalShow">
           <!-- 头像 -->
           <div class="uhead">
-            <div class="head min-ccenter" style="backgroundImage:url(http://hackbinimg.luokangyuan.com/20190103110148/1.jpg)">
+            <!-- <div class="head min-ccenter" style="backgroundImage:url(http://hackbinimg.luokangyuan.com/20181026091093/wei-xin-tu-pian-_20181026095000.jpg)"> -->
+            <div class="head min-ccenter">
               <!-- <img class="head-img" :src="bgObj.src" alt="" srcset=""> -->
+              <img class="head-img" src="http://hackbinimg.luokangyuan.com/20180802100899/timjie-tu-20180802104746.png" alt="" srcset="">
             </div>
             <div class="umsg">
-              <h3>杉木河水流</h3>
+              <h3>杉木搜索 · 更多结果</h3>
             </div>
           </div>
           <!-- 模糊背景 -->
           <div class="head-bg mid-center">
             <!-- <div class="bg" :style="{backgroundImage:'url(' +bgObj.src+ ')'}"></div> -->
-            <div class="bg" style="backgroundImage:url(http://hackbinimg.luokangyuan.com/20190103110148/1.jpg)"></div>
+            <div class="bg" style="backgroundImage:url(http://hackbinimg.luokangyuan.com/20180802100899/timjie-tu-20180802104746.png)"></div>
           </div>
           <!-- 设置列表 -->
           <div class="u-settings">
             <ul>
-              <li>
+              <li title="是否在搜索栏底下显示常用收藏">
                 <span>
                   <i class="icon-bookmark"></i>
-                  <span class="name" title="是否在搜索栏底下显示常用收藏">常用收藏</span>
+                  <span class="name">常用收藏</span>
+                  <span class="des">启用/关闭首页收藏</span>
                 </span>
                 <MySwitch 
                   :switchChecked="true" 
@@ -357,10 +360,11 @@
                   :fun="switchCommonBookMark"
                   ></MySwitch>
               </li>
-              <li>
+              <li title="是否显示侧边收藏夹入口">
                 <span>
                   <i class="icon-bookmarks"></i>
-                  <span class="name" title="是否显示侧边收藏夹入口">侧边收藏</span>
+                  <span class="name">侧边收藏</span>
+                  <span class="des">启用/关闭侧边收藏</span>
                 </span>
                 <MySwitch 
                   :switchChecked="true" 
@@ -369,21 +373,31 @@
                   :fun="switchSideBookMark"
                   ></MySwitch>
               </li>
-              <li class="cuosor_p hover-eff">
+              <li class="cuosor_p hover-eff" title="所有的设置项">
                 <span>
                   <i class="icon-cogs"></i>
-                  <span class="name" title="是否显示侧边收藏夹入口">超级设置</span>
+                  <span class="name">超级设置</span>
+                  <span class="des">所有可配置项</span>
+                </span>
+              </li>
+              <li class="cuosor_p hover-eff" title="详细使用帮助">
+                <span>
+                  <i class="icon-deng"></i>
+                  <span class="name">使用帮助</span>
                 </span>
               </li>
             </ul>
           </div>
           <!-- 按钮 -->
           <div class="send-data mid-center">
-            <div class="btn mid-center" @click="logOut">
+            <!-- <div class="btn mid-center save-data" @click="logOut">
               备份数据
             </div>
-            <div class="btn mid-center save-data" @click="sendData">
+            <div class="btn mid-center recover-data" @click="sendData">
               恢复数据
+            </div> -->
+            <div class="btn mid-center login hover-bg" @click="login">
+              &emsp;&emsp;&emsp;登&emsp;录&emsp;&emsp;&emsp;
             </div>
           </div>
           <!-- 退出登录 -->
@@ -392,9 +406,9 @@
             <span>登出</span>
           </div>
           <!-- 登录提示 -->
-          <div class="login-tip">
+          <!-- <div class="login-tip">
 
-          </div>
+          </div> -->
         </div>
       </transition>
     </div>
@@ -1267,6 +1281,11 @@ export default {
       ],
       // 搜索输入框值
       searchTxt: '',
+
+      //登录
+      login() {
+
+      },
       // 弹窗显示
       alertObj: {
         show: false,
@@ -1436,7 +1455,6 @@ export default {
 
     // 同步数据
     sendData () {
-      this.$store.commit('changeBookMarkShow');
     },
 
     // 退出登录
@@ -2317,29 +2335,40 @@ export default {
       margin-top: 50px;
       width:350px;
       background: rgb(255, 255, 255);
-      padding: 40px 40px 30px;
+      padding: 30px 40px;
       box-shadow: @box-shadow;
       .uhead{
         position: relative;
         z-index: 20;
         width: 100%;
+        // height: 185px;
         display: flex;
         flex-direction: column;
         align-items: center;
         .head{
-          width:150px;
-          height:150px;
+          width:200px;
+          height:200px;
           border-radius: 100%;
           overflow: hidden;
           background-size: cover;
           background-position: center;
           background-repeat: no-repeat;
-          border: 5px solid rgba(148, 148, 148, 0.719);
+          border: 5px solid rgba(255, 255, 255, 0.4);
+          box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+          transition: @animateTime;
+          cursor: pointer;
+          // &:hover{
+          //   transform: scale(1.5);
+          // }
+          .head-img{
+            width: 100%;
+            height: 100%;
+          }
         }
         .umsg{
           margin-top: 10px;
           color: #fff;
-          text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+          text-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
         }
       }
       .head-bg{
@@ -2358,7 +2387,7 @@ export default {
           background-size: cover;
           background-position: center;
           background-repeat: no-repeat;
-          filter: blur(25px) brightness(1.5);
+          filter: blur(15px) brightness(1.2);
         }
       }
       .u-settings{
@@ -2375,19 +2404,22 @@ export default {
             justify-content: space-between;
             list-style: none;
             user-select: none;
+            color: @main-txt-color;
+            transition: @animateTime;
             &:not(:last-child){
               border-bottom: 1px dotted #dedede;
             }
-            // background: #dedede;
+            &:hover{
+              background: linear-gradient(to right,rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0));
+            }
             .name{
               margin-left: 5px;
-              color: @main-txt-color;
               font-weight: bold;
             }
             .des{
               margin-left: 3px;
               font-size: 12px;
-              color: #acacac;
+              color: #8d8d8d;
             }
           }
         }
@@ -2397,17 +2429,29 @@ export default {
         margin-top: 10px;
         justify-content: space-around;
         .btn{
-          width:100px;
+          min-width:100px;
           height:40px;
           border-radius: 20px;
-          background: @main-blue;
           color:#fff;
           font-weight: bold;
           user-select: none;
           box-shadow: @box-shadow;
+          transition: @animateTime;
           cursor: pointer;
+          &.recover-data{
+            background: @main-blue;
+            &:hover{
+              background: @main-blue-dark;
+            }
+          }
           &.save-data{
             background: @main-green;
+            &:hover{
+              background: @main-green-dark;
+            }
+          }
+          &.login{
+            background: @main-color;
           }
           &:active{
             transform: scale(.95);
@@ -2419,13 +2463,23 @@ export default {
         top:10px;
         right: 10px;
         z-index: 10;
-        font-size: 12px;
-        color: rgba(255, 255, 255, 0.616);
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.8);
+        text-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
         cursor:pointer;
         transition: @animateTime;
         &:hover{
           color: rgb(255, 255, 255);
         }
+      }
+      .login-tip{
+        position: absolute;
+        top:0;
+        left:0;
+        z-index: 200;
+        width:100%;
+        height:100%;
+        background: radial-gradient(rgba(255, 0, 0, 0.692), rgbargba(255, 0, 0, 0.973));
       }
     }
   }
