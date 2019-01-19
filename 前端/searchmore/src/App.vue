@@ -126,19 +126,19 @@
               v-for="(bsItemObj, indexParent) in browserArr"
               draggable="true">
                 <div class="touch icon-tuodong"></div>
-                <MySwitch 
+                <!-- <MySwitch 
                 :switchChecked="bsItemObj.active" 
                 :switchName="bsItemObj.name"
                 :switchId="indexParent"
                 :fun="selectobj(indexParent)"
-                ></MySwitch>
-                <!-- <div class="switch-obj">
+                ></MySwitch> -->
+                <div class="switch-obj">
                   <input class="switch-btn" type="checkbox" 
-                  :switchChecked="bsItemObj.active" 
-                  :switchName="bsItemObj.name" 
-                  :switchId="bsItemObj.iconName">
+                  :checked="bsItemObj.active" 
+                  :name="bsItemObj.name" 
+                  :id="bsItemObj.iconName">
                   <label :for="bsItemObj.iconName" @click="selectObj(indexParent)" class="switch-btn-label"></label>
-                </div> -->
+                </div>
                 <div class="obj-name">
                   <!-- <i :class="bsItemObj.iconName"></i>&nbsp; -->
                   <span>{{bsItemObj.name}}：</span>
@@ -225,6 +225,7 @@
         <span>杉木搜索</span>
       </a>
     </transition>
+
     <!-- 搜索结果页面浏览器切换按钮 -->
     <transition name="to-bottom">
       <div class="hd-broser-list" v-show="searchResultShow" v-for="(bsItemArr, parentObjName) in browserArr" v-if="bsItemArr.current">
@@ -317,7 +318,7 @@
     </a>
 
     <!-- 个人  @mouseover="personnalShow = true"
-      @mouseleave="personnalShow = false"-->
+      @mouseleave="personnalShow = false" -->
     <div class="personal"
      
       v-show="!searchResultShow"
@@ -333,7 +334,7 @@
             <!-- <div class="head min-ccenter" style="backgroundImage:url(http://hackbinimg.luokangyuan.com/20181026091093/wei-xin-tu-pian-_20181026095000.jpg)"> -->
             <div class="head min-ccenter">
               <!-- <img class="head-img" :src="bgObj.src" alt="" srcset=""> -->
-              <img class="head-img" src="http://hackbinimg.luokangyuan.com/20180802100899/timjie-tu-20180802104746.png" alt="" srcset="">
+              <img class="head-img" src="http://hackbinimg.luokangyuan.com/20181026091093/wei-xin-tu-pian-_20181026095000.jpg" alt="" srcset="">
             </div>
             <div class="umsg">
               <h3>杉木搜索 · 更多结果</h3>
@@ -342,7 +343,7 @@
           <!-- 模糊背景 -->
           <div class="head-bg mid-center">
             <!-- <div class="bg" :style="{backgroundImage:'url(' +bgObj.src+ ')'}"></div> -->
-            <div class="bg" style="backgroundImage:url(http://hackbinimg.luokangyuan.com/20180802100899/timjie-tu-20180802104746.png)"></div>
+            <div class="bg" style="backgroundImage:url(http://hackbinimg.luokangyuan.com/20181026091093/wei-xin-tu-pian-_20181026095000.jpg)"></div>
           </div>
           <!-- 设置列表 -->
           <div class="u-settings">
@@ -351,29 +352,27 @@
                 <span>
                   <i class="icon-bookmark"></i>
                   <span class="name">常用收藏</span>
-                  <span class="des">启用/关闭首页收藏</span>
                 </span>
-                <MySwitch 
-                  :switchChecked="true" 
-                  :switchName="1"
-                  :switchId="8888888888888888"
-                  :fun="switchCommonBookMark"
-                  ></MySwitch>
+                <div class="switch-three">
+                  <div class="option active mid-center" @click="stitchThree(1)">开</div>
+                  <div class="option mid-center" @click="stitchThree(2)">隐</div>
+                  <div class="option mid-center" @click="stitchThree(3)">关</div>
+                </div>
               </li>
               <li title="是否显示侧边收藏夹入口">
                 <span>
                   <i class="icon-bookmarks"></i>
                   <span class="name">侧边收藏</span>
-                  <span class="des">启用/关闭侧边收藏</span>
                 </span>
-                <MySwitch 
-                  :switchChecked="true" 
-                  :switchName="1"
-                  :switchId="9999999999999999999"
-                  :fun="switchSideBookMark"
-                  ></MySwitch>
+                <div class="switch-three">
+                  <div class="option active mid-center">开</div>
+                  <div class="option mid-center">隐</div>
+                  <div class="option mid-center">关</div>
+                </div>
               </li>
-              <li class="cuosor_p hover-eff" title="所有的设置项">
+              <li class="cuosor_p hover-eff" title="所有的设置项"
+                @click="changeSuperSetting"
+              >
                 <span>
                   <i class="icon-cogs"></i>
                   <span class="name">超级设置</span>
@@ -414,6 +413,29 @@
     </div>
 
     <!-- 超级设置页面 -->
+    <transition name="to-top">
+      <div class="setting-all" v-show="superSettingShow">
+        <div class="set-panel mid-center">
+          <div class="set-box">
+            <!-- 头部 -->
+            <div class="title mid-center">
+              <span>超级设置</span>
+              <div class="close mid-center"
+                @click="changeSuperSetting"
+              >
+                <i class="icon-cha"></i>
+              </div>
+            </div>
+            <div class="content">
+                <p v-for="i in 100">dsadfsdf</p>
+            </div>
+            <div class="btn-box"></div>
+          </div>
+          <div class="bg" :style="{backgroundImage: 'url(' +bgObj.src+ ')'}"></div>
+        </div>
+      </div>
+    </transition>
+
   </div>
 </template>
 
@@ -442,6 +464,9 @@ export default {
       
       // 控制设置面板显示
       setPanelShow: false,
+
+      // 超级设置显示
+      superSettingShow: false,
 
       // 搜索结果展示
       searchResultShow: false,
@@ -1436,13 +1461,12 @@ export default {
         }
       }
     },
-
     // 激活、取消大类
     selectobj (indexParent) {
-      // this.browserArr[indexParent].active = !this.browserArr[indexParent].active;
+      this.browserArr[indexParent].active = !this.browserArr[indexParent].active;
     },
 
-    // 鼠标覆盖变迁大类
+    // 鼠标覆盖便签大类
     hoverBookMark (index) {
       for(let i=0; i<this.bookMark.length; i++) {
         if(i == index) {
@@ -1466,10 +1490,34 @@ export default {
     switchCommonBookMark() {
       this.$store.commit('changeBookMarkShow');
     },
+
     // 切换侧边书签
     switchSideBookMark () {
-      this.$store.commit('changeSlideBookMarkShow');
+      this.$store.commit('changeSideBookMarkShow');
+    },
+
+    // 切换超级设置显示
+    changeSuperSetting () {
+      this.superSettingShow = !this.superSettingShow;
+    },
+
+    // 点击三相开关
+    stitchThree (flag) {
+      switch (flag) {
+        case 1:
+          alert(1);
+          break;
+        case 2:
+          alert(2);
+          break;
+        case 3:
+          alert(3);
+          break;
+        default:
+          break;
+      }
     }
+
   },
   computed: {
     // 是否展示常用书签
@@ -1488,9 +1536,9 @@ export default {
     // 必应壁纸
     this.$http.jsonp('http://bing.ioliu.cn/v1',
       {
-        // params:{
-        //   d: 4,
-        // },
+        params:{
+          d: 20,
+        },
         jsonp:'callback'
       })
       .then(function(res){
@@ -2377,12 +2425,12 @@ export default {
         top:0;
         left:0;
         width:100%;
-        height: 250px;
+        height: 280px;
         overflow: hidden;
         // background: #fff;
         .bg{
           width: 300px;
-          height: 250PX;
+          height: 280PX;
           transform: scale(1.3);
           background-size: cover;
           background-position: center;
@@ -2409,7 +2457,7 @@ export default {
             &:not(:last-child){
               border-bottom: 1px dotted #dedede;
             }
-            &:hover{
+            &.hover-eff:hover{
               background: linear-gradient(to right,rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0));
             }
             .name{
@@ -2480,6 +2528,121 @@ export default {
         width:100%;
         height:100%;
         background: radial-gradient(rgba(255, 0, 0, 0.692), rgbargba(255, 0, 0, 0.973));
+      }
+    }
+  }
+  .setting-all{
+    position:fixed;
+    top:0;
+    left:0;
+    z-index: 200;
+    width:100%;
+    height: 100%;
+    // background: rgba(0, 0, 0, 0.6);
+    .set-panel{
+      position: absolute;
+      left:50%;
+      margin: 10vh 0 0 -500px;
+      width:1000px;
+      height:80vh;
+      background-color: rgba(255, 255, 255, 0.9);
+      box-shadow: @box-shadow;
+      overflow: hidden;
+      user-select: none;
+      .set-box{
+        position: absolute;
+        z-index: 2;
+        top:0;
+        left:0;
+        width: 100%;
+        height:100%;
+        background: rgba(255, 255, 255, 0.6);
+        color: @main-txt-color;
+        display: flex;
+        flex-direction: column;
+        .title{
+          position: relative;
+          width:100%;
+          height:50px;
+          font-size: 18px;
+          font-weight: bold;
+          background: rgba(255, 255, 255, 0.6);
+          flex: 0 0 auto;
+          .close{
+            position: absolute;
+            right:10px;
+            top:10px;
+            width: 30px;
+            height:30px;
+            border-radius: 50%;
+            font-size: 12px;
+            color: @main-color;
+            border: 1px solid @main-color;
+            cursor: pointer;
+            transition: @animateTime;
+            &:hover{
+              transform: rotate(180deg);
+            }
+          }
+        }
+        .content{
+          flex: 1 1 auto;
+          overflow-y: auto;
+          padding: 20px;
+
+        }
+        .btn-box{
+          width:100%;
+          height: 60px;
+          flex: 0 0 auto;
+          background: rgba(255, 255, 255, 0.6);
+        }
+      }
+      .bg{
+        position: absolute;
+        z-index: 1;
+        top:0;
+        left:0;
+        margin-left: -50%;
+        margin-top: -50%;
+        width: 200%;
+        height: 200%;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-color: rgb(255, 255, 255);
+        background-size: 100%;
+        filter: blur(50px);
+      }
+    }
+  }
+
+  // 三相开关
+  .switch-three{
+    width:100px;
+    height:24px;
+    display: flex;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05) inset;
+    font-size:12px;
+    font-weight: bold;
+    .option{
+      height: 100%;
+      flex: 1 0 auto;
+      cursor:pointer;
+      transition: @animateTime;
+      &:not(:first-child){
+        border-left: 1px solid rgb(233, 233, 233);
+      }
+      &:hover{
+        background: #ececec;
+      }
+      &.active{
+        background:@main-green;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2) inset;
+        color: #fff;
       }
     }
   }

@@ -30,7 +30,7 @@ const store = new Vuex.Store({
       state.commonBookMarkShowState = !state.commonBookMarkShowState;
     },
     // 切换侧边书签
-    changeSlideBookMarkShow(state) {
+    changeSideBookMarkShow(state) {
       state.sideBookMarkShowState = !state.sideBookMarkShowState;
     }
   }
