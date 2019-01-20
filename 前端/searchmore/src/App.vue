@@ -126,19 +126,20 @@
               v-for="(bsItemObj, indexParent) in browserArr"
               draggable="true">
                 <div class="touch icon-tuodong"></div>
-                <!-- <MySwitch 
+                <MySwitch 
                 :switchChecked="bsItemObj.active" 
                 :switchName="bsItemObj.name"
                 :switchId="indexParent"
-                :fun="selectobj(indexParent)"
-                ></MySwitch> -->
-                <div class="switch-obj">
+                :changeData="bsItemObj"
+                @switchFun = "selectobj"
+                ></MySwitch>
+                <!-- <div class="switch-obj">
                   <input class="switch-btn" type="checkbox" 
                   :checked="bsItemObj.active" 
                   :name="bsItemObj.name" 
                   :id="bsItemObj.iconName">
                   <label :for="bsItemObj.iconName" @click="selectObj(indexParent)" class="switch-btn-label"></label>
-                </div>
+                </div> -->
                 <div class="obj-name">
                   <!-- <i :class="bsItemObj.iconName"></i>&nbsp; -->
                   <span>{{bsItemObj.name}}：</span>
@@ -317,10 +318,10 @@
       <i class="icon-xiazai"></i>
     </a>
 
-    <!-- 个人  @mouseover="personnalShow = true"
-      @mouseleave="personnalShow = false" -->
+    <!-- 个人   -->
     <div class="personal"
-     
+      @mouseover="personnalShow = true"
+      @mouseleave="personnalShow = false"
       v-show="!searchResultShow"
     >
       <div class="personal-head mid-center">
@@ -364,11 +365,7 @@
                   <i class="icon-bookmarks"></i>
                   <span class="name">侧边收藏</span>
                 </span>
-                <div class="switch-three">
-                  <div class="option active mid-center">开</div>
-                  <div class="option mid-center">隐</div>
-                  <div class="option mid-center">关</div>
-                </div>
+                <MySwitchThree></MySwitchThree>
               </li>
               <li class="cuosor_p hover-eff" title="所有的设置项"
                 @click="changeSuperSetting"
@@ -389,18 +386,12 @@
           </div>
           <!-- 按钮 -->
           <div class="send-data mid-center">
-            <!-- <div class="btn mid-center save-data" @click="logOut">
-              备份数据
-            </div>
-            <div class="btn mid-center recover-data" @click="sendData">
-              恢复数据
-            </div> -->
-            <div class="btn mid-center login hover-bg" @click="login">
-              &emsp;&emsp;&emsp;登&emsp;录&emsp;&emsp;&emsp;
-            </div>
+            <!-- <myButton :btnType="'green'" @myBtnFun="sendData">备份数据</myButton>
+            <myButton :btnType="'blue'" @myBtnFun="recData">恢复数据</myButton> -->
+            <myButton :btnType="'red'" @myBtnFun="login">登 录</myButton>
           </div>
           <!-- 退出登录 -->
-          <div class="u-logout">
+          <div class="u-logout" @click="logOut">
             <i class="icon-switch"></i>
             <span>登出</span>
           </div>
@@ -419,18 +410,31 @@
           <div class="set-box">
             <!-- 头部 -->
             <div class="title mid-center">
-              <span>超级设置</span>
+              <div class="setting-title">
+                <div class="item mid-center active">
+                  书签设置
+                </div>
+                <div class="item mid-center">
+                  搜索设置
+                </div>
+              </div>
               <div class="close mid-center"
                 @click="changeSuperSetting"
               >
                 <i class="icon-cha"></i>
               </div>
             </div>
+            <!-- 中间 -->
             <div class="content">
-                <p v-for="i in 100">dsadfsdf</p>
+              
             </div>
-            <div class="btn-box"></div>
+          <!-- 底部 -->
+            <div class="btn-box mid-center">
+              <myButton :btnType="'red'" @myBtnFun="sendData">放弃编辑</myButton>
+              <myButton :btnType="'green'" @myBtnFun="sendData" class="ml20">保存设置</myButton>
+            </div>
           </div>
+          <!-- 背景图片模糊效果 -->
           <div class="bg" :style="{backgroundImage: 'url(' +bgObj.src+ ')'}"></div>
         </div>
       </div>
@@ -443,12 +447,17 @@
 import AlertBox from '../src/components/alert.vue'
 import BookMark from '../src/components/bookMark.vue'
 import MySwitch from '../src/components/switch.vue'
+import myButton from '../src/components/myButton.vue'
+import MySwitchThree from '../src/components/switchThree.vue'
+
 export default {
   name: 'App',
   components: {
     AlertBox,
     BookMark,
-    MySwitch
+    MySwitch,
+    myButton,
+    MySwitchThree
   },
   data () {
     return {
@@ -466,7 +475,7 @@ export default {
       setPanelShow: false,
 
       // 超级设置显示
-      superSettingShow: false,
+      superSettingShow: true,
 
       // 搜索结果展示
       searchResultShow: false,
@@ -475,7 +484,7 @@ export default {
       subBookMarkShow: false,
 
       // 个人页面展示
-      personnalShow: true,
+      personnalShow: false,
 
       // 输入框下拉关键词
       searchTipObj: {
@@ -1309,6 +1318,10 @@ export default {
 
       //登录
       login() {
+        alert('登录')
+      },
+      // 备份
+      saveData () {
 
       },
       // 弹窗显示
@@ -1321,7 +1334,7 @@ export default {
   },
   methods: {
     // 搜索事件
-    searchNow (index) {
+    searchNow: function (index) {
       var searchTxt = this.searchTxt; // 输入框文本
       // this.$refs.inputbox.blur(); // 让输入框失去焦点
       if (searchTxt != '') {
@@ -1349,13 +1362,13 @@ export default {
     },
 
     // 输入框enter
-    inputEnter (index) {
+    inputEnter: function (index) {
       this.searchTipObj.show = false;
       this.searchNow(index);
     },
 
     // 聚焦输入框
-    inputFocus () {
+    inputFocus: function () {
       // 未展现搜索结果时，改变背景图样式
       if(this.searchResultShow == false){
         this.bgBlur = true;
@@ -1367,7 +1380,7 @@ export default {
     },
  
     // 输入框失去焦点
-    inputLeave () {
+    inputLeave: function () {
       this.searchTipObj.show = false;
       this.bgBlur = false;
       // if(this.searchTipObj.data.length > 0) {
@@ -1376,7 +1389,7 @@ export default {
     },
 
     // 切换搜索引擎
-    changeBrowser (parentObjName, indexChild) {
+    changeBrowser: function (parentObjName, indexChild) {
       var brArr = this.browserArr[parentObjName].data;
       for ( var i=0; i<brArr.length; i++) {
         if (indexChild == i) {
@@ -1389,18 +1402,18 @@ export default {
     },
 
     // 添加搜索引擎
-    addBrowser() {
+    addBrowser: function() {
       this.alertObj.show = true;
       this.alertObj.text = "明日开发";
       this.alertObj.textEn = "too young too simple";
     },
     // 开启、关闭搜索引擎
-    switchBrowser (indexParent, indexChild) {
+    switchBrowser: function (indexParent, indexChild) {
       this.browserArr[indexParent].data[indexChild].active = !this.browserArr[indexParent].data[indexChild].active;
     },
 
     // 百度提示
-    getBaidu () {
+    getBaidu: function () {
       if (this.searchTxt != "") {
         this.$http.jsonp('https://sp0.baidu.com/5a1Fazu8AA54nxGko9WTAnF6hhy/su',
         {
@@ -1424,7 +1437,7 @@ export default {
     },
 
     // 选中百度提示
-    selectTip (indexParent, indexChild) {
+    selectTip: function (indexParent, indexChild) {
       this.searchTxt = this.searchTipObj.data[indexChild];
       this.searchNow(indexParent);
       this.searchTipObj.show = false;
@@ -1433,7 +1446,7 @@ export default {
 
 
     // 键盘上
-    tipUp () {
+    tipUp: function () {
       this.searchTipObj.nowIndex--;
       if(this.searchTipObj.nowIndex <= -1) {
         this.searchTipObj.nowIndex = this.searchTipObj.data.length - 1;
@@ -1442,7 +1455,7 @@ export default {
     },
 
     //键盘下
-    tipDown () {
+    tipDown: function () {
       this.searchTipObj.nowIndex++;
       if(this.searchTipObj.nowIndex >= this.searchTipObj.data.length) {
         this.searchTipObj.nowIndex = 0;
@@ -1451,7 +1464,7 @@ export default {
     },
 
     // 输入框 切换首选搜索引擎
-    chooseThisEngineAnCurrent (indexParent, indexChild) {
+    chooseThisEngineAnCurrent: function (indexParent, indexChild) {
       var thisArr = this.browserArr[indexParent].data;
       for(let i = 0; i < thisArr.length; i++) {
         if(i == indexChild) {
@@ -1461,13 +1474,14 @@ export default {
         }
       }
     },
+
     // 激活、取消大类
-    selectobj (indexParent) {
-      this.browserArr[indexParent].active = !this.browserArr[indexParent].active;
+    selectobj: function (changeVal) {
+      changeVal.active = !changeVal.active;
     },
 
     // 鼠标覆盖便签大类
-    hoverBookMark (index) {
+    hoverBookMark: function (index) {
       for(let i=0; i<this.bookMark.length; i++) {
         if(i == index) {
           this.bookMark[i].show = true;
@@ -1477,32 +1491,38 @@ export default {
       }
     },
 
-    // 同步数据
-    sendData () {
+    // 备份数据
+    sendData: function () {
+      alert('备份数据')
+    },
+
+    // 恢复数据
+    recData: function () {
+      alert('恢复数据')
     },
 
     // 退出登录
-    logOut () {
-
+    logOut: function () {
+      alert('登出')
     },
 
     // 切换常用书签
-    switchCommonBookMark() {
+    switchCommonBookMark: function() {
       this.$store.commit('changeBookMarkShow');
     },
 
     // 切换侧边书签
-    switchSideBookMark () {
+    switchSideBookMark: function () {
       this.$store.commit('changeSideBookMarkShow');
     },
 
     // 切换超级设置显示
-    changeSuperSetting () {
+    changeSuperSetting: function () {
       this.superSettingShow = !this.superSettingShow;
     },
 
     // 点击三相开关
-    stitchThree (flag) {
+    stitchThree: function (flag) {
       switch (flag) {
         case 1:
           alert(1);
@@ -1536,9 +1556,9 @@ export default {
     // 必应壁纸
     this.$http.jsonp('http://bing.ioliu.cn/v1',
       {
-        params:{
-          d: 20,
-        },
+        // params:{
+        //   d: 20,
+        // },
         jsonp:'callback'
       })
       .then(function(res){
@@ -1795,45 +1815,6 @@ export default {
               height: 40px;
               line-height: 40px;
               cursor: move;
-            }
-            // 开关
-            .switch-obj{
-              height:30px;
-              line-height:30px;
-              user-select: none;
-              display: flex;
-              align-items:center;
-              .switch-btn{
-                opacity: 0;
-                &:checked+.switch-btn-label{
-                  background:#11d8c7;
-                  &::after{
-                    left:23px;
-                  }
-                }
-              }
-              .switch-btn-label{
-                position:absolute;
-                cursor: pointer;
-                display:inline-block;
-                width: 45px;
-                height:24px;
-                border-radius:15px;
-                background:#adadad;
-                transition: @animateTime;
-                &::after{
-                  position: absolute;
-                  content: "";
-                  transition: @animateTime;
-                  display:inline-block;
-                  left:2px;
-                  width:20px;
-                  height:20px;
-                  margin-top: 2px;
-                  border-radius:100%;
-                  background:rgb(255, 255, 255);
-                }
-              }
             }
             .obj-name{
               margin-left: 5px;
@@ -2476,35 +2457,6 @@ export default {
         width:100%;
         margin-top: 10px;
         justify-content: space-around;
-        .btn{
-          min-width:100px;
-          height:40px;
-          border-radius: 20px;
-          color:#fff;
-          font-weight: bold;
-          user-select: none;
-          box-shadow: @box-shadow;
-          transition: @animateTime;
-          cursor: pointer;
-          &.recover-data{
-            background: @main-blue;
-            &:hover{
-              background: @main-blue-dark;
-            }
-          }
-          &.save-data{
-            background: @main-green;
-            &:hover{
-              background: @main-green-dark;
-            }
-          }
-          &.login{
-            background: @main-color;
-          }
-          &:active{
-            transform: scale(.95);
-          }
-        }
       }
       .u-logout{
         position:absolute;
@@ -2568,6 +2520,31 @@ export default {
           font-weight: bold;
           background: rgba(255, 255, 255, 0.6);
           flex: 0 0 auto;
+          .setting-title{
+            height: 100%;
+            display: flex;
+            .item{
+              min-width: 100px;
+              height:100%;
+              background:rgba(0, 0, 0, 0.1);
+              transition: @animateTime;
+              &.active{
+                background: @main-color;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.1) inset;
+                color: #fff;
+                &:hover{
+                  background:@main-color-dark;
+                }
+              }
+              &:hover{
+                background:rgba(0, 0, 0, 0.2);
+              }
+              cursor: pointer;
+              &:not(:first-child){
+                border-left: 1px solid rgba(255, 255, 255, 0.3);
+              }
+            }
+          }
           .close{
             position: absolute;
             right:10px;
@@ -2612,37 +2589,7 @@ export default {
         background-position: center;
         background-color: rgb(255, 255, 255);
         background-size: 100%;
-        filter: blur(50px);
-      }
-    }
-  }
-
-  // 三相开关
-  .switch-three{
-    width:100px;
-    height:24px;
-    display: flex;
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05) inset;
-    font-size:12px;
-    font-weight: bold;
-    .option{
-      height: 100%;
-      flex: 1 0 auto;
-      cursor:pointer;
-      transition: @animateTime;
-      &:not(:first-child){
-        border-left: 1px solid rgb(233, 233, 233);
-      }
-      &:hover{
-        background: #ececec;
-      }
-      &.active{
-        background:@main-green;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2) inset;
-        color: #fff;
+        filter: blur(30px);
       }
     }
   }

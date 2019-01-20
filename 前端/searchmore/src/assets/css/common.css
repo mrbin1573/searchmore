@@ -65,7 +65,7 @@
   transition: 0.3s;
 }
 .hover-bg:hover {
-  background: #cc1212 !important;
+  background: #c41e1e !important;
 }
 .txtUnavtive {
   color: #7a7a7a !important;
@@ -91,4 +91,7 @@
 }
 .cuosor_p {
   cursor: pointer;
+}
+.ml20 {
+  margin-left: 20px;
 }

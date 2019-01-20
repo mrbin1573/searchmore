@@ -1,10 +1,14 @@
 // ==============变量==================
 @animateTime: .3s;
 @main-color: #de1a1a;
+@main-color-dark: #c41e1e;
+
 @main-green: #11d8c7;
 @main-green-dark: #12b6a8;
+
 @main-blue: #31b1fc;
 @main-blue-dark: #128dd4;
+
 @box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 @main-txt-color: #494949;
 // ==============动画===================
@@ -77,7 +81,7 @@
 .hover-bg{
   transition: @animateTime;
   &:hover{
-    background: #cc1212 !important;
+    background: @main-color-dark !important;
   }
 }
 .txtUnavtive{
@@ -116,4 +120,7 @@
 
 .cuosor_p{
   cursor: pointer;
+}
+.ml20{
+  margin-left: 20px;
 }

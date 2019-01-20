@@ -1,4 +1,5 @@
 <template>
+<!-- 双相开关 -->
   <div class="switch-obj">
     <input class="switch-btn" type="checkbox" :checked="switchChecked" :name="switchName" :id="switchId">
     <label :for="switchId" @click="selectClick" class="switch-btn-label"></label>
@@ -8,7 +9,7 @@
 <script>
 export default {
   name: "swicth",
-  props: ["switchChecked", "switchName", "switchId", "fun"],
+  props: ["switchChecked", "switchName", "switchId", "changeData"],
   data(){
     return {
       editShow: false
@@ -16,8 +17,7 @@ export default {
   },
   methods: {
     selectClick: function () {
-      // this.$emit("fun")
-      this.fun();
+      this.$emit("switchFun", this.changeData);
     }
   }
 };
