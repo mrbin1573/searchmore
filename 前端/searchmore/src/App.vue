@@ -53,27 +53,6 @@
           <div class="border-line line-top" :class="inputFocusBool == true ? 'focus' : ''"></div>
           <div class="border-line line-bottom" :class="inputFocusBool == true ? 'focus' : ''"></div>
           <div class="line-left" :class="inputFocusBool == true ? 'focus' : ''"></div>
-
-          <!-- 输入框首选引擎 -->
-          <!-- <div class="first-engine"  
-          v-for="(currentEngineArr, indexParent) in browserArr"
-          v-if="currentEngineArr.current"  
-          @mouseover="firstEngineShow = true"
-          @mouseleave="firstEngineShow = false">
-            输入框显示引擎图标
-            <div class="now-engine" v-for="currentEngine in currentEngineArr.data" v-show="currentEngine.current">
-              <i :class="currentEngine.icon" :style="{color:currentEngine.iconColor}"></i>
-            </div>
-            <transition name="to-top">
-              <ul class="f-list-box" v-show="firstEngineShow" :style="{background: searchResultShow == true ? '#fff':''}">
-                <div class="tip">切换首选搜索引擎</div>
-                <li class="f-item" v-for="(currentEngine, indexChild) in currentEngineArr.data" @click="chooseThisEngineAnCurrent(indexParent, indexChild)" :class="{active:currentEngine.current}">
-                  <i :class="currentEngine.icon" :style="{color:currentEngine.iconColor}"></i><span class="f-engine-name">{{currentEngine.name}}</span>
-                </li>
-              </ul>
-            </transition>
-          </div> -->
-
         </div>
 
         <!-- 搜索结果 提示 -->
@@ -411,11 +390,12 @@
             <!-- 头部 -->
             <div class="title mid-center">
               <div class="setting-title">
-                <div class="item mid-center active">
-                  书签设置
-                </div>
-                <div class="item mid-center">
-                  搜索设置
+                <div class="item mid-center" 
+                  v-for="(item, index) in superSettingMenu"
+                  :class="{active:item.active}"
+                  @click="changeSupperMenu(index)"
+                >
+                  {{item.name}}
                 </div>
               </div>
               <div class="close mid-center"
@@ -426,7 +406,45 @@
             </div>
             <!-- 中间 -->
             <div class="content">
-              
+              <!-- 书签 -->
+              <transition name="to-left">
+                <div class="setting-page superset-book-mark" v-show="superSettingMenu[0].active">
+                  <draggable 
+                    v-model="bookMark" 
+                    @start="drag=true" 
+                    @end="drag=false"
+                    :options="{
+                      group:'bookmarkType',
+                      animation: 500,
+                      handle: '.title'
+                    }"
+                  >
+                    <div class="setting-row-item" v-for="(bmItem, indexParent) in bookMark">
+                      <div class="title mid-center">
+                        <i class="icon-tuodong"></i>
+                        <div class="name">{{bmItem.name}}</div>
+                      </div>
+                      <div class="bm-item">
+                        <BookMark :bookMarkArr="bmItem.data" @dragEnd="dragEndFun(data)"></BookMark>
+                      </div>
+                    </div>
+                  </draggable>
+                </div>
+              </transition>
+              <!-- 搜索引擎 -->
+              <transition name="to-left">
+                <div class="setting-page superset-search" v-show="superSettingMenu[1].active">
+                  <div class="setting-row-item" v-for="(brItem, indexParent) in browserArr">
+                    <div class="title mid-center">
+                      <i class="icon-tuodong"></i>
+                      <div class="name">{{brItem.name}}</div>
+                    </div>
+                    <div class="bm-item">
+                      <BookMark :bookMarkArr="brItem.data"></BookMark>
+                    </div>
+                  </div>
+                </div>
+              </transition>
             </div>
           <!-- 底部 -->
             <div class="btn-box mid-center">
@@ -449,6 +467,7 @@ import BookMark from '../src/components/bookMark.vue'
 import MySwitch from '../src/components/switch.vue'
 import myButton from '../src/components/myButton.vue'
 import MySwitchThree from '../src/components/switchThree.vue'
+import draggable from 'vuedraggable'
 
 export default {
   name: 'App',
@@ -457,7 +476,8 @@ export default {
     BookMark,
     MySwitch,
     myButton,
-    MySwitchThree
+    MySwitchThree,
+    draggable
   },
   data () {
     return {
@@ -471,12 +491,22 @@ export default {
       // 输入框聚焦
       inputFocusBool: false,
       
-      // 控制设置面板显示
+      // 输入框设置显示
       setPanelShow: false,
 
       // 超级设置显示
       superSettingShow: true,
-
+      // 超级设置菜单内容
+      superSettingMenu :[
+        {
+          name: "书签设置",
+          active: true,
+        },
+        {
+          name: "搜索设置",
+          active: false,
+        },
+      ],
       // 搜索结果展示
       searchResultShow: false,
 
@@ -501,18 +531,18 @@ export default {
       // 搜索引擎列表
       browserArr: [
         {
-          name:'网页',
-          iconName:'icon-wangluo',// 已弃用
+          name:'网页', // 两个字
           active: true, // 是否可用
           current: true, // 是否当前搜索的项，不用传递到后台
           order: 0,
           data:[
             {
               name: "百度",
-              browserUrl: 'https://www.baidu.com/s?wd=',
+              url: 'https://www.baidu.com/s?wd=',
               resultSrc:'',// 搜索结果的链接
               order: 0,
               icon: "icon-baidu",
+              iconType: 'svg',
               active: true, // 是否激活可用状态
               current: true, // 是否为当前选中显示搜索结果页面
               iconColor: "#3385ff", // 图标颜色
@@ -521,9 +551,10 @@ export default {
             },
             {
               name: "谷歌",
-              browserUrl: 'https://www.google.com/search?q=',
+              url: 'https://www.google.com/search?q=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-google",
+              iconType: 'svg',
               active: true,
               current: false,
               iconColor: "rgb(251, 188, 5)",
@@ -534,10 +565,10 @@ export default {
             },
             {
               name: "360",
-              browserUrl: 'https://www.so.com/s?q=',
+              url: 'https://www.so.com/s?q=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-360",
-              
+              iconType: 'svg',
               active: true,
               current: false,
               iconColor: "#1bc550",
@@ -545,11 +576,11 @@ export default {
             },
             {
               name: "搜狗",
-              browserUrl: 'https://www.sogou.com/web?query=',
+              url: 'https://www.sogou.com/web?query=',
               resultSrc:'',
               icon: "icon-sougou",
+              iconType: 'svg',
               bgColor: "background: #f84a19",
-              
               active: true,
               current: false,
               iconColor: "#f84a19",
@@ -557,10 +588,10 @@ export default {
             },
             {
               name: "必应",
-              browserUrl: 'https://cn.bing.com/search?q=',
+              url: 'https://cn.bing.com/search?q=',
               resultSrc:'',
               icon: "icon-bing",
-              
+              iconType: 'svg',
               active: true,
               current: false,
               iconColor: "#007daa",
@@ -575,14 +606,13 @@ export default {
           active: true,
           current: false,
           name:'图片',
-          iconName:'icon-img',
           data:[
             {
               name: "百度",
-              browserUrl: 'https://image.baidu.com/search/index?tn=baiduimage&word=',
+              url: 'https://image.baidu.com/search/index?tn=baiduimage&word=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-baidu",
-              use: true, // 是否首选项
+              iconType: 'svg',
               active: true, // 是否激活可用状态
               current: true, // 是否为当前选中显示搜索结果页面
               iconColor: "#3385ff", // 图标颜色
@@ -591,10 +621,10 @@ export default {
             },
             {
               name: "谷歌",
-              browserUrl: 'https://google.suanfazu.com/search/?q=',
+              url: 'https://google.suanfazu.com/search/?q=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-google",
-              
+              iconType: 'svg',
               active: true,
               current: false,
               iconColor: "rgb(251, 188, 5)",
@@ -605,10 +635,10 @@ export default {
             },
             {
               name: "360",
-              browserUrl: 'http://image.so.com/i?q=',
+              url: 'http://image.so.com/i?q=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-360",
-              
+              iconType: 'svg',
               active: true,
               current: false,
               iconColor: "#1bc550",
@@ -616,11 +646,10 @@ export default {
             },
             {
               name: "搜狗",
-              browserUrl: 'https://pic.sogou.com/pics?query=',
+              url: 'https://pic.sogou.com/pics?query=',
               resultSrc:'',
               icon: "icon-sougou",
-              bgColor: "background: #f84a19",
-              
+              iconType: 'svg',
               active: true,
               current: false,
               iconColor: "#f84a19",
@@ -628,10 +657,10 @@ export default {
             },
             {
               name: "必应",
-              browserUrl: 'https://cn.bing.com/images/search?q=',
+              url: 'https://cn.bing.com/images/search?q=',
               resultSrc:'',
               icon: "icon-bing",
-              
+              iconType: 'svg',
               active: true,
               current: false,
               iconColor: "#007daa",
@@ -641,423 +670,12 @@ export default {
               },
             }
           ]
-        },
-        {
-          active: false,
-          current: false,
-          name:'音乐',
-          iconName:'icon-yinyue',
-          data:[
-            {
-              name: "百度",
-              browserUrl: 'https://www.baidu.com/s?wd=',
-              resultSrc:'',// 搜索结果的链接
-              icon: "icon-baidu",
-              use: true, // 是否首选项
-              active: true, // 是否激活可用状态
-              current: true, // 是否为当前选中显示搜索结果页面
-              iconColor: "#3385ff", // 图标颜色
-              resultIframeStyle: { //搜索结果的单独样式
-              },
-            },
-            {
-              name: "谷歌",
-              browserUrl: 'https://google.suanfazu.com/search/?q=',
-              resultSrc:'',// 搜索结果的链接
-              icon: "icon-google",
-              
-              active: true,
-              current: false,
-              iconColor: "rgb(251, 188, 5)",
-              resultIframeStyle: { //搜索结果的单独样式
-                marginTop: '-53px',
-                height:'calc(100% + 53px)'
-              },
-            },
-            {
-              name: "360",
-              browserUrl: 'https://www.so.com/s?q=',
-              resultSrc:'',// 搜索结果的链接
-              icon: "icon-360",
-              
-              active: true,
-              current: false,
-              iconColor: "#1bc550",
-              resultIframeStyle: {},
-            },
-            {
-              name: "搜狗",
-              browserUrl: 'https://www.sogou.com/web?query=',
-              resultSrc:'',
-              icon: "icon-sougou",
-              bgColor: "background: #f84a19",
-              
-              active: true,
-              current: false,
-              iconColor: "#f84a19",
-              resultIframeStyle: {},
-            },
-            {
-              name: "必应",
-              browserUrl: 'https://cn.bing.com/search?q=',
-              resultSrc:'',
-              icon: "icon-bing",
-              
-              active: true,
-              current: false,
-              iconColor: "#007daa",
-              resultIframeStyle: { //搜索结果的单独样式
-                marginTop: '-35px',
-                height:'calc(100% + 35px)'
-              },
-            }
-          ]
-        },
-        {
-          active: false,
-          current: false,
-          name:'影视',
-          iconName:'icon-shipin',
-          data:[
-            {
-              name: "百度",
-              browserUrl: 'https://www.baidu.com/s?wd=',
-              resultSrc:'',// 搜索结果的链接
-              icon: "icon-baidu",
-              use: true, // 是否首选项
-              active: true, // 是否激活可用状态
-              current: true, // 是否为当前选中显示搜索结果页面
-              iconColor: "#3385ff", // 图标颜色
-              resultIframeStyle: { //搜索结果的单独样式
-              },
-            },
-            {
-              name: "谷歌",
-              browserUrl: 'https://google.suanfazu.com/search/?q=',
-              resultSrc:'',// 搜索结果的链接
-              icon: "icon-google",
-              
-              active: true,
-              current: false,
-              iconColor: "rgb(251, 188, 5)",
-              resultIframeStyle: { //搜索结果的单独样式
-                marginTop: '-53px',
-                height:'calc(100% + 53px)'
-              },
-            },
-            {
-              name: "360",
-              browserUrl: 'https://www.so.com/s?q=',
-              resultSrc:'',// 搜索结果的链接
-              icon: "icon-360",
-              
-              active: true,
-              current: false,
-              iconColor: "#1bc550",
-              resultIframeStyle: {},
-            },
-            {
-              name: "搜狗",
-              browserUrl: 'https://www.sogou.com/web?query=',
-              resultSrc:'',
-              icon: "icon-sougou",
-              bgColor: "background: #f84a19",
-              
-              active: true,
-              current: false,
-              iconColor: "#f84a19",
-              resultIframeStyle: {},
-            },
-            {
-              name: "必应",
-              browserUrl: 'https://cn.bing.com/search?q=',
-              resultSrc:'',
-              icon: "icon-bing",
-              
-              active: true,
-              current: false,
-              iconColor: "#007daa",
-              resultIframeStyle: { //搜索结果的单独样式
-                marginTop: '-35px',
-                height:'calc(100% + 35px)'
-              },
-            }
-          ]
-        },
-        {
-          active: false,
-          current: false,
-          name:'地图',
-          iconName:'icon-ditu',
-          data:[
-            {
-              name: "百度",
-              browserUrl: 'https://www.baidu.com/s?wd=',
-              resultSrc:'',// 搜索结果的链接
-              icon: "icon-baidu",
-              use: true, // 是否首选项
-              active: true, // 是否激活可用状态
-              current: true, // 是否为当前选中显示搜索结果页面
-              iconColor: "#3385ff", // 图标颜色
-              resultIframeStyle: { //搜索结果的单独样式
-              },
-            },
-            {
-              name: "谷歌",
-              browserUrl: 'https://google.suanfazu.com/search/?q=',
-              resultSrc:'',// 搜索结果的链接
-              icon: "icon-google",
-              
-              active: true,
-              current: false,
-              iconColor: "rgb(251, 188, 5)",
-              resultIframeStyle: { //搜索结果的单独样式
-                marginTop: '-53px',
-                height:'calc(100% + 53px)'
-              },
-            },
-            {
-              name: "360",
-              browserUrl: 'https://www.so.com/s?q=',
-              resultSrc:'',// 搜索结果的链接
-              icon: "icon-360",
-              
-              active: true,
-              current: false,
-              iconColor: "#1bc550",
-              resultIframeStyle: {},
-            },
-            {
-              name: "搜狗",
-              browserUrl: 'https://www.sogou.com/web?query=',
-              resultSrc:'',
-              icon: "icon-sougou",
-              bgColor: "background: #f84a19",
-              
-              active: true,
-              current: false,
-              iconColor: "#f84a19",
-              resultIframeStyle: {},
-            },
-            {
-              name: "必应",
-              browserUrl: 'https://cn.bing.com/search?q=',
-              resultSrc:'',
-              icon: "icon-bing",
-              
-              active: true,
-              current: false,
-              iconColor: "#007daa",
-              resultIframeStyle: { //搜索结果的单独样式
-                marginTop: '-35px',
-                height:'calc(100% + 35px)'
-              },
-            }
-          ]
-        },
-        {
-          active: false,
-          current: false,
-          name:'文档',
-          iconName:'icon-wenxianjiansuoshenqing',
-          data:[
-            {
-              name: "百度",
-              browserUrl: 'https://www.baidu.com/s?wd=',
-              resultSrc:'',// 搜索结果的链接
-              icon: "icon-baidu",
-              use: true, // 是否首选项
-              active: true, // 是否激活可用状态
-              current: true, // 是否为当前选中显示搜索结果页面
-              iconColor: "#3385ff", // 图标颜色
-              resultIframeStyle: { //搜索结果的单独样式
-              },
-            },
-            {
-              name: "谷歌",
-              browserUrl: 'https://google.suanfazu.com/search/?q=',
-              resultSrc:'',// 搜索结果的链接
-              icon: "icon-google",
-              
-              active: true,
-              current: false,
-              iconColor: "rgb(251, 188, 5)",
-              resultIframeStyle: { //搜索结果的单独样式
-                marginTop: '-53px',
-                height:'calc(100% + 53px)'
-              },
-            },
-            {
-              name: "360",
-              browserUrl: 'https://www.so.com/s?q=',
-              resultSrc:'',// 搜索结果的链接
-              icon: "icon-360",
-              
-              active: true,
-              current: false,
-              iconColor: "#1bc550",
-              resultIframeStyle: {},
-            },
-            {
-              name: "搜狗",
-              browserUrl: 'https://www.sogou.com/web?query=',
-              resultSrc:'',
-              icon: "icon-sougou",
-              bgColor: "background: #f84a19",
-              
-              active: true,
-              current: false,
-              iconColor: "#f84a19",
-              resultIframeStyle: {},
-            },
-            {
-              name: "必应",
-              browserUrl: 'https://cn.bing.com/search?q=',
-              resultSrc:'',
-              icon: "icon-bing",
-              
-              active: true,
-              current: false,
-              iconColor: "#007daa",
-              resultIframeStyle: { //搜索结果的单独样式
-                marginTop: '-35px',
-                height:'calc(100% + 35px)'
-              },
-            }
-          ]
-        },
-        {
-          active: false,
-          current: false,
-          name:'购物',
-          iconName:'icon-gouwu',
-          data:[
-            {
-              name: "百度",
-              browserUrl: 'https://www.baidu.com/s?wd=',
-              resultSrc:'',// 搜索结果的链接
-              icon: "icon-baidu",
-              use: true, // 是否首选项
-              active: true, // 是否激活可用状态
-              current: true, // 是否为当前选中显示搜索结果页面
-              iconColor: "#3385ff", // 图标颜色
-              resultIframeStyle: { //搜索结果的单独样式
-              },
-            },
-            {
-              name: "谷歌",
-              browserUrl: 'https://google.suanfazu.com/search/?q=',
-              resultSrc:'',// 搜索结果的链接
-              icon: "icon-google",
-              
-              active: true,
-              current: false,
-              iconColor: "rgb(251, 188, 5)",
-              resultIframeStyle: { //搜索结果的单独样式
-                marginTop: '-53px',
-                height:'calc(100% + 53px)'
-              },
-            },
-            {
-              name: "360",
-              browserUrl: 'https://www.so.com/s?q=',
-              resultSrc:'',// 搜索结果的链接
-              icon: "icon-360",
-              
-              active: true,
-              current: false,
-              iconColor: "#1bc550",
-              resultIframeStyle: {},
-            },
-            {
-              name: "搜狗",
-              browserUrl: 'https://www.sogou.com/web?query=',
-              resultSrc:'',
-              icon: "icon-sougou",
-              bgColor: "background: #f84a19",
-              
-              active: true,
-              current: false,
-              iconColor: "#f84a19",
-              resultIframeStyle: {},
-            },
-            {
-              name: "必应",
-              browserUrl: 'https://cn.bing.com/search?q=',
-              resultSrc:'',
-              icon: "icon-bing",
-              
-              active: true,
-              current: false,
-              iconColor: "#007daa",
-              resultIframeStyle: { //搜索结果的单独样式
-                marginTop: '-35px',
-                height:'calc(100% + 35px)'
-              },
-            },
-            {
-              name: "必应",
-              browserUrl: 'https://cn.bing.com/search?q=',
-              resultSrc:'',
-              icon: "icon-bing",
-              
-              active: true,
-              current: false,
-              iconColor: "#007daa",
-              resultIframeStyle: { //搜索结果的单独样式
-                marginTop: '-35px',
-                height:'calc(100% + 35px)'
-              },
-            },
-            {
-              name: "必应",
-              browserUrl: 'https://cn.bing.com/search?q=',
-              resultSrc:'',
-              icon: "icon-bing",
-              
-              active: true,
-              current: false,
-              iconColor: "#007daa",
-              resultIframeStyle: { //搜索结果的单独样式
-                marginTop: '-35px',
-                height:'calc(100% + 35px)'
-              },
-            },
-            {
-              name: "必应",
-              browserUrl: 'https://cn.bing.com/search?q=',
-              resultSrc:'',
-              icon: "icon-bing",
-              
-              active: true,
-              current: false,
-              iconColor: "#007daa",
-              resultIframeStyle: { //搜索结果的单独样式
-                marginTop: '-35px',
-                height:'calc(100% + 35px)'
-              },
-            },
-            {
-              name: "必应",
-              browserUrl: 'https://cn.bing.com/search?q=',
-              resultSrc:'',
-              icon: "icon-bing",
-              
-              active: true,
-              current: false,
-              iconColor: "#007daa",
-              resultIframeStyle: { //搜索结果的单独样式
-                marginTop: '-35px',
-                height:'calc(100% + 35px)'
-              },
-            },
-          ]
-        },
+        }
       ],
       // 书签
       bookMark: [
         {
-          name:'学习',
+          name:'爱学习', // 三个字以内
           icon:'icon-zaixianxuexi',
           order:'1',
           show: true,
@@ -1065,20 +683,23 @@ export default {
             {
               name: 'csdn',
               icon: 'csdn',
+              iconType:'text', // 图标类型
               order: 1,
-              style:'',
+              style:'font-size: 24px',
               url:'http://w3more.cn/'
             },
             {
               name: 'vue',
-              icon: 'V',
+              icon: 'https://cn.vuejs.org/images/logo.png',
+              iconType:'image',
               order: 2,
-              style:'',
+              style:'background: #fff;',
               url:'http://w3more.cn/'
             },
             {
               name: 'React',
               icon: 'React',
+              iconType:'text',
               order: 3,
               style:'',
               url:'http://w3more.cn/'
@@ -1094,6 +715,7 @@ export default {
             {
               name: '生活',
               icon: '生活',
+              iconType:'text',
               order: 1,
               style:'',
               url:'http://w3more.cn/'
@@ -1101,6 +723,7 @@ export default {
             {
               name: '生活',
               icon: '生活',
+              iconType:'text',
               order: 2,
               style:'',
               url:'http://w3more.cn/'
@@ -1108,6 +731,7 @@ export default {
             {
               name: '生活',
               icon: '生活',
+              iconType:'text',
               order: 3,
               style:'',
               url:'http://w3more.cn/'
@@ -1123,6 +747,7 @@ export default {
             {
               name: '工作',
               icon: '工作',
+              iconType:'text',
               order: 1,
               style:'',
               url:'http://w3more.cn/'
@@ -1130,6 +755,7 @@ export default {
             {
               name: '工作',
               icon: '工作',
+              iconType:'text',
               order: 2,
               style:'',
               url:'http://w3more.cn/'
@@ -1137,6 +763,7 @@ export default {
             {
               name: '工作',
               icon: '工作',
+              iconType:'text',
               order: 3,
               style:'',
               url:'http://w3more.cn/'
@@ -1152,6 +779,7 @@ export default {
             {
               name: '工作',
               icon: '工作',
+              iconType:'text',
               order: 1,
               style:'',
               url:'http://w3more.cn/'
@@ -1159,6 +787,7 @@ export default {
             {
               name: '工作',
               icon: '工作',
+              iconType:'text',
               order: 2,
               bgColor:'',
               url:'http://w3more.cn/'
@@ -1166,6 +795,7 @@ export default {
             {
               name: '工作',
               icon: '工作',
+              iconType:'text',
               order: 3,
               style:'',
               url:'http://w3more.cn/'
@@ -1181,18 +811,21 @@ export default {
             {
               name: '工作',
               icon: '工作',
+              iconType:'text',
               style:'',
               url:'http://w3more.cn/'
             },
             {
               name: '工作',
               icon: '工作',
+              iconType:'text',
               style:'',
               url:'http://w3more.cn/'
             },
             {
               name: '工作',
               icon: '工作',
+              iconType:'text',
               style:'',
               url:'http://w3more.cn/'
             },
@@ -1207,6 +840,7 @@ export default {
             {
               name: '工作',
               icon: '工作',
+              iconType:'text',
               order: 1,
               style:'',
               url:'http://w3more.cn/'
@@ -1214,6 +848,7 @@ export default {
             {
               name: '工作',
               icon: '工作',
+              iconType:'text',
               order: 2,
               style:'',
               url:'http://w3more.cn/'
@@ -1221,6 +856,7 @@ export default {
             {
               name: '工作',
               icon: '工作',
+              iconType:'text',
               order: 3,
               style:'',
               url:'http://w3more.cn/'
@@ -1234,22 +870,25 @@ export default {
           show: false,
           data: [
             {
-              name: 'html教程',
-              icon: 'html教程',
+              name: 'vue官网',
+              icon: 'V',
+              iconType:'text',
               order: 1,
               style:'red',
-              url:'http://w3more.cn/'
+              url:'https://cn.vuejs.org/'
             },
             {
-              name: '常用',
-              icon: '常用',
+              name: 'github',
+              icon: 'Git',
+              iconType:'text',
               order: 2,
               style:'blue',
-              url:'http://w3more.cn/'
+              url:'https://github.com/'
             },
             {
               name: '常用',
               icon: '常用',
+              iconType:'text',
               order: 3,
               style:'green',
               url:'http://w3more.cn/'
@@ -1257,6 +896,15 @@ export default {
             {
               name: '常用',
               icon: '常用',
+              iconType:'text',
+              order: 3,
+              style:'green',
+              url:'http://w3more.cn/'
+            },
+            {
+              name: '常用',
+              icon: '常用',
+              iconType:'text',
               order: 4,
               style:'yellow',
               url:'http://w3more.cn/'
@@ -1264,6 +912,7 @@ export default {
             {
               name: '常用',
               icon: '常用',
+              iconType:'text',
               order: 5,
               style:'purple',
               url:'http://w3more.cn/'
@@ -1271,6 +920,7 @@ export default {
             {
               name: '常用',
               icon: '常用',
+              iconType:'text',
               order: 6,
               style:'black',
               url:'http://w3more.cn/'
@@ -1278,6 +928,7 @@ export default {
             {
               name: '常用',
               icon: '常用',
+              iconType:'text',
               order: 7,
               style:'green',
               url:'http://w3more.cn/'
@@ -1285,6 +936,7 @@ export default {
             {
               name: '常用',
               icon: '常用',
+              iconType:'text',
               order: 8,
               style:'blue',
               url:'http://w3more.cn/'
@@ -1292,6 +944,7 @@ export default {
             {
               name: '常用',
               icon: '常用',
+              iconType:'text',
               order: 9,
               style:'red',
               url:'http://w3more.cn/'
@@ -1299,6 +952,7 @@ export default {
             {
               name: '常用',
               icon: '常用',
+              iconType:'text',
               order: 10,
               style:'gray',
               url:'http://w3more.cn/'
@@ -1306,6 +960,7 @@ export default {
             {
               name: '常用',
               icon: '常用',
+              iconType:'text',
               order: 11,
               style:'orange',
               url:'http://w3more.cn/'
@@ -1346,7 +1001,7 @@ export default {
             brObj[i].current = true;
             for (let j=0; j<currentObj.data.length; j++) {
               if(currentObj.data[j].current == true) {
-                currentObj.data[j].resultSrc = currentObj.data[j].browserUrl + this.searchTxt;
+                currentObj.data[j].resultSrc = currentObj.data[j].url + this.searchTxt;
               }
             }
           } else {
@@ -1412,6 +1067,16 @@ export default {
       this.browserArr[indexParent].data[indexChild].active = !this.browserArr[indexParent].data[indexChild].active;
     },
 
+    // 切换 超级设置 菜单
+    changeSupperMenu (index) {
+      for(var i=0; i<this.superSettingMenu.length; i++) {
+        if(index == i) {
+          this.superSettingMenu[i].active = true;
+        } else {
+          this.superSettingMenu[i].active = false;
+        }
+      }
+    },
     // 百度提示
     getBaidu: function () {
       if (this.searchTxt != "") {
@@ -1956,45 +1621,49 @@ export default {
       // background: #dedede;
       display: flex;
       flex-wrap: wrap;
-      .item{
-        width: 100px;
-        height:100px;
-        margin-left: 8px;
-        margin-bottom: 8px;
-        background: rgba(0, 0, 0, 0.3);
-        cursor: pointer;
-        transition: @animateTime;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        transition: @animateTime;
-        user-select: none;
-        text-decoration: none;
-        .icon{
-          width: 55px;
-          height: 55px;
-          border-radius: 50%;
-          background: rgba(0, 0, 0, 0.322);
-          .icon-txt{
-            color: #fff;
-          }
-        }
-        .name{
-          color:#fff;
-          margin-top: 5px;
-        }
-        &:active{
-          transform: scale(.9);
-        }
-        &:hover{
-          background: rgba(48, 48, 48, 0.3);
-          box-shadow: @box-shadow;
-        }
-        &:nth-child(6n + 1){
-          margin-left: 0;
-        }
-      }
+      // .item{
+      //   width: 100px;
+      //   height:100px;
+      //   margin-left: 8px;
+      //   margin-bottom: 8px;
+      //   background: rgba(0, 0, 0, 0.3);
+      //   cursor: pointer;
+      //   transition: @animateTime;
+      //   display: flex;
+      //   flex-direction: column;
+      //   align-items: center;
+      //   justify-content: center;
+      //   transition: @animateTime;
+      //   user-select: none;
+      //   text-decoration: none;
+      //   .icon{
+      //     width: 55px;
+      //     height: 55px;
+      //     border-radius: 50%;
+      //     background: rgba(0, 0, 0, 0.322);
+      //     .txt{
+      //       color: #fff;
+      //     }
+      //     .image{
+      //       max-width: 55px;
+      //       max-height: 55px;
+      //     }
+      //   }
+      //   .name{
+      //     color:#fff;
+      //     margin-top: 5px;
+      //   }
+      //   &:active{
+      //     transform: scale(.9);
+      //   }
+      //   &:hover{
+      //     background: rgba(48, 48, 48, 0.3);
+      //     box-shadow: @box-shadow;
+      //   }
+      //   &:nth-child(6n + 1){
+      //     margin-left: 0;
+      //   }
+      // }
     }
     .search-result-content{
       position: fixed;
@@ -2490,13 +2159,12 @@ export default {
     z-index: 200;
     width:100%;
     height: 100%;
-    // background: rgba(0, 0, 0, 0.6);
     .set-panel{
       position: absolute;
       left:50%;
-      margin: 10vh 0 0 -500px;
-      width:1000px;
-      height:80vh;
+      margin: 5vh 0 0 -532px;
+      width:1064px;
+      height:90vh;
       background-color: rgba(255, 255, 255, 0.9);
       box-shadow: @box-shadow;
       overflow: hidden;
@@ -2565,8 +2233,41 @@ export default {
         .content{
           flex: 1 1 auto;
           overflow-y: auto;
-          padding: 20px;
-
+          overflow-x: hidden;
+          position: relative;
+          .setting-page {
+            position:absolute;
+            padding: 0 20px;
+            transition: @animateTime * 1.5;
+            .setting-row-item{
+              display: flex;
+              padding: 20px 0;
+              &:not(:first-child){
+                border-top: 1px solid rgb(165, 165, 165);
+              }
+              .title{
+                position: relative;
+                display: flex;
+                height:100px;
+                width:40px;
+                margin:4px;
+                margin-left: 0;
+                background:linear-gradient(rgba(247, 247, 247, 0.5),rgba(255, 255, 255, 0.5),rgrgba(247, 247, 247, 0.5));
+                cursor: pointer;
+                flex-direction: column;
+                .icon-tuodong{
+                  position:absolute;
+                  top:0px;
+                  transform: rotate(90deg);
+                  font-size: 18px;
+                }
+                .name{
+                  writing-mode:vertical-lr;
+                  letter-spacing: 3px;
+                }
+              }
+            }
+          }
         }
         .btn-box{
           width:100%;

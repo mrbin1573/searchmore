@@ -1,33 +1,46 @@
 <template>
   <transition name="to-top" tag="div">
     <div>
-      <a
-        class="sub-menu-item"
-        draggable="true"
-        target="_blank"
-        v-for="(bmItem, index) in bookMarkArr"
-        :href="bmItem.url"
-        @click.prevent.right="editBookMarkItem"
+      <draggable 
+        v-model="dataCopy" 
+        @start="drag=true" 
+        @end="dragEnd"
+        :options="{
+          group:'item',
+          animation: 500,
+        }"
       >
-        <!-- <div class="icon mid-center" :style="{background: bmItem.bgColor}"> -->
-        <div class="icon mid-center" :style="{background: colorArr[index]}">
-          <span class="icon-txt" :class="bmItem.icon">{{bmItem.icon}}</span>
-        </div>
-        <span class="name">{{bmItem.name}}</span>
-        <div class="del-bmark mid-center" v-show="editShow" @click.prevent="deleNow">
-          <i class="icon-cha"></i>
-        </div>
-      </a>
+        <a
+          class="sub-menu-item"
+          target="_blank"
+          v-for="(bmItem, index) in dataCopy"
+          :href="bmItem.url"
+          @click.prevent.right="editBookMarkItem"
+        >
+          <div class="icon mid-center" :style="bmItem.style">
+          <!-- <div class="icon mid-center"> -->
+            <!-- 图标 -->
+            <span class="svg" v-if="bmItem.iconType == 'svg'" :class="bmItem.icon"></span>
+            <!-- 文字 -->
+            <span class="txt" v-else-if="bmItem.iconType == 'text'">{{bmItem.icon}}</span>
+            <!-- 图片 -->
+            <img class="image" v-else-if="bmItem.iconType == 'image'" :src="bmItem.icon">
+          </div>
+          <span class="name">{{bmItem.name}}</span>
+          <div class="del-bmark mid-center" v-show="editShow" @click.prevent="deleNow">
+            <i class="icon-cha"></i>
+          </div>
+        </a>
+      </draggable>
       <!-- 添加 -->
       <div
         class="sub-menu-item"
-        draggable="true"
         target="_blank"
         href="javascript:;"
         @click.prevent="addBookMark"
       >
         <div class="icon mid-center">
-          <span class="icon-txt icon-add"></span>
+          <span class="txt icon-add"></span>
         </div>
         <span class="name">添加</span>
       </div>
@@ -36,9 +49,14 @@
 </template>
 
 <script>
+import draggable from 'vuedraggable'
+
 export default {
   name: "bookMark",
   props: ["bookMarkArr"],
+  components: {
+    draggable
+  },
   data(){
     return {
       editShow: false,
@@ -59,7 +77,8 @@ export default {
         '#03a8f3',
         '#8ac249',
         '#5f7c8a',
-      ]
+      ],
+      dataCopy: this.bookMarkArr
     }
   },
   methods: {
@@ -73,6 +92,11 @@ export default {
     },
     addBookMark () {
       alert('添加')
+    },
+    // 拖动结束
+    dragEnd () {
+      this.$emit();
+      console.log(this.dataCopy)
     }
   }
 };
@@ -102,8 +126,15 @@ export default {
     border-radius: 50%;
     background: rgba(0, 0, 0, 0.322);
     overflow: hidden;
-    .icon-txt {
+    .svg{
       color: #fff;
+      font-size: 30px;
+    }
+    .txt {
+      color: #fff;
+    }
+    .image{
+      width:60%;
     }
   }
   .name {
@@ -127,7 +158,7 @@ export default {
   &:hover {
     background: rgba(0, 0, 0, 0.507);
     box-shadow: @box-shadow;
-    border: 2px solid rgba(0, 0, 0, 0.13);
+    // border: 2px solid rgba(0, 0, 0, 0.13);
   }
 }
 </style>
