@@ -1,40 +1,40 @@
 <template>
-  <transition name="to-top" tag="div">
-    <div>
-      <draggable 
-        v-model="dataCopy" 
-        @start="drag=true" 
-        @end="dragEnd"
-        :options="{
-          group:'item',
-          animation: 500,
-        }"
+  <div>
+    <draggable 
+      v-model="dataCopy" 
+      @start="drag=true" 
+      @end="dragEnd"
+      :options="{
+        group:'item',
+        animation: 500,
+        filter: '.filtered',
+      }"
+    >
+      <a
+        class="sub-menu-item"
+        :class="{small: small}"
+        target="_blank"
+        v-for="(bmItem, index) in dataCopy"
+        :href="bmItem.url"
+        @click.prevent.right="editBookMarkItem"
       >
-        <a
-          class="sub-menu-item"
-          target="_blank"
-          v-for="(bmItem, index) in dataCopy"
-          :href="bmItem.url"
-          @click.prevent.right="editBookMarkItem"
-        >
-          <div class="icon mid-center" :style="bmItem.style">
-          <!-- <div class="icon mid-center"> -->
-            <!-- 图标 -->
-            <span class="svg" v-if="bmItem.iconType == 'svg'" :class="bmItem.icon"></span>
-            <!-- 文字 -->
-            <span class="txt" v-else-if="bmItem.iconType == 'text'">{{bmItem.icon}}</span>
-            <!-- 图片 -->
-            <img class="image" v-else-if="bmItem.iconType == 'image'" :src="bmItem.icon">
-          </div>
-          <span class="name">{{bmItem.name}}</span>
-          <div class="del-bmark mid-center" v-show="editShow" @click.prevent="deleNow">
-            <i class="icon-cha"></i>
-          </div>
-        </a>
-      </draggable>
+        <div class="icon mid-center" :style="bmItem.style">
+        <!-- <div class="icon mid-center"> -->
+          <!-- 图标 -->
+          <span class="svg" v-if="bmItem.iconType == 'svg'" :class="bmItem.icon"></span>
+          <!-- 文字 -->
+          <span class="txt" v-else-if="bmItem.iconType == 'text'">{{bmItem.icon}}</span>
+          <!-- 图片 -->
+          <img class="image" v-else-if="bmItem.iconType == 'image'" :src="bmItem.icon">
+        </div>
+        <span class="name">{{bmItem.name}}</span>
+        <div class="del-bmark mid-center" v-show="editShow" @click.prevent="deleNow">
+          <i class="icon-cha"></i>
+        </div>
+      </a>
       <!-- 添加 -->
       <div
-        class="sub-menu-item"
+        class="sub-menu-item filtered"
         target="_blank"
         href="javascript:;"
         @click.prevent="addBookMark"
@@ -44,8 +44,8 @@
         </div>
         <span class="name">添加</span>
       </div>
-    </div>
-  </transition>
+    </draggable>
+  </div>
 </template>
 
 <script>
@@ -53,7 +53,7 @@ import draggable from 'vuedraggable'
 
 export default {
   name: "bookMark",
-  props: ["bookMarkArr"],
+  props: ["bookMarkArr", "dataIndex", "small"],
   components: {
     draggable
   },
@@ -78,7 +78,7 @@ export default {
         '#8ac249',
         '#5f7c8a',
       ],
-      dataCopy: this.bookMarkArr
+      dataCopy: this.bookMarkArr,
     }
   },
   methods: {
@@ -95,9 +95,18 @@ export default {
     },
     // 拖动结束
     dragEnd () {
-      this.$emit();
-      console.log(this.dataCopy)
+      // 传回数据到父级
+      this.$emit('dragEnd', {data: this.dataCopy, index:this.dataIndex});
     }
+  },
+  watch: {
+    bookMarkArr: {
+      handler(newValue, oldValue) {
+        this.dataCopy = newValue;
+        console.log(newValue);
+      },
+      deep: true
+  　}
   }
 };
 </script>
@@ -120,6 +129,14 @@ export default {
   user-select: none;
   text-decoration: none;
   text-align: center;
+  &.small{
+    width:70px;
+    height:70px;
+    .icon {
+      width: 50px;
+      height: 50px;
+    }
+  }
   .icon {
     width: 65px;
     height: 65px;

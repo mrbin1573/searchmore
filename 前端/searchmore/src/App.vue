@@ -76,9 +76,10 @@
         <!-- 设置页面 -->
         <!-- <div class="set-panel"> -->
         <div class="set-panel" 
-        @mouseover="setPanelShow = true" 
-        @mouseleave="setPanelShow = false">
-          
+          @mouseover="setPanelShow = true" 
+          @mouseleave="setPanelShow = false"
+        >
+
           <!-- 设置齿轮图标 -->
           <div class="set-icon">
             <i class="icon-setting"></i>
@@ -101,43 +102,51 @@
               </h5>
 
               <!-- 搜索配置选项 列表 -->
-              <div class="browser-list-box clearfix" 
-              v-for="(bsItemObj, indexParent) in browserArr"
-              draggable="true">
-                <div class="touch icon-tuodong"></div>
-                <MySwitch 
-                :switchChecked="bsItemObj.active" 
-                :switchName="bsItemObj.name"
-                :switchId="indexParent"
-                :changeData="bsItemObj"
-                @switchFun = "selectobj"
-                ></MySwitch>
-                <!-- <div class="switch-obj">
-                  <input class="switch-btn" type="checkbox" 
-                  :checked="bsItemObj.active" 
-                  :name="bsItemObj.name" 
-                  :id="bsItemObj.iconName">
-                  <label :for="bsItemObj.iconName" @click="selectObj(indexParent)" class="switch-btn-label"></label>
-                </div> -->
-                <div class="obj-name">
-                  <!-- <i :class="bsItemObj.iconName"></i>&nbsp; -->
-                  <span>{{bsItemObj.name}}：</span>
-                </div>
-                <div class="browser-item" 
-                v-for="(bsItem, indexChild) in bsItemObj.data"  
-                :class="{txtUnavtive: !bsItem.active}" 
-                @click="switchBrowser(indexParent, indexChild)">
-                  <h4 class="browser-name">{{bsItem.name}}</h4>
-                </div>
-                <!-- 手动添加按钮 -->
-                <div class="browser-item active" @click="addBrowser()">
-                  <div class="browser-icon mid-center" style="background:#4e4e4e;">
-                    <i class="icon-add"></i>
+              <draggable 
+                v-model="browserArr"
+                @end=""
+                :options="{
+                  group:'inputEearchEngine',
+                  animation: 500,
+                  handle: '.touch'
+                }"
+              >
+                <div class="browser-list-box clearfix" 
+                  v-for="(bsItemObj, indexParent) in browserArr">
+                  <div class="touch icon-tuodong"></div>
+                  <MySwitch 
+                  :switchChecked.sync="bsItemObj.active" 
+                  :switchName="bsItemObj.name"
+                  :switchId="indexParent"
+                  :changeData="bsItemObj"
+                  @switchFun = "selectobj"
+                  ></MySwitch>
+                  <!-- <div class="switch-obj">
+                    <input class="switch-btn" type="checkbox" 
+                    :checked="bsItemObj.active" 
+                    :name="bsItemObj.name" 
+                    :id="bsItemObj.iconName">
+                    <label :for="bsItemObj.iconName" @click="selectObj(indexParent)" class="switch-btn-label"></label>
+                  </div> -->
+                  <div class="obj-name">
+                    <!-- <i :class="bsItemObj.iconName"></i>&nbsp; -->
+                    <span>{{bsItemObj.name}}：</span>
                   </div>
-                  <h4 class="browser-name">添加</h4>
+                  <div class="browser-item" 
+                  v-for="(bsItem, indexChild) in bsItemObj.data"  
+                  :class="{txtUnavtive: !bsItem.active}" 
+                  @click="switchBrowser(indexParent, indexChild)">
+                    <h4 class="browser-name">{{bsItem.name}}</h4>
+                  </div>
+                  <!-- 手动添加按钮 -->
+                  <div class="browser-item active" @click="addBrowser()">
+                    <div class="browser-icon mid-center" style="background:#4e4e4e;">
+                      <i class="icon-add"></i>
+                    </div>
+                    <h4 class="browser-name">添加</h4>
+                  </div>
                 </div>
-              </div>
-
+              </draggable>
               <!-- 扫一扫 -->
               <!-- <div class="erwema-box">
                 <div class="erweima-title">只要扫一下其中一个二维码，你的钱包就会少两块钱</div>
@@ -247,17 +256,27 @@
           <!-- 大类列表 -->
           <div class="bm-list-box">
             <ul class="bm-list">
-              <li  
-              draggable="true" 
-              class="bm-item hover-bg" 
-              v-for="(bmItem, index) in bookMark" 
-              @mouseover="hoverBookMark(index)"
-              :style="{order:bmItem.order}"
+              <draggable 
+                v-model="bookMark"
+                @end=""
+                :options="{
+                  group:'leftBookMark',
+                  animation: 500,
+                  handle: '.touch'
+                }"
               >
-                <div class="touch icon-tuodong"></div>
-                <i :class="bmItem.icon"></i>
-                <span class="menu-name">{{bmItem.name}}</span>
-              </li>
+                <li  
+                  draggable="true" 
+                  class="bm-item hover-bg" 
+                  v-for="(bmItem, index) in bookMark" 
+                  @mouseover="hoverBookMark(index)"
+                  :style="{order:bmItem.order}"
+                >
+                  <div class="touch icon-tuodong"></div>
+                  <i :class="bmItem.icon"></i>
+                  <span class="menu-name">{{bmItem.name}}</span>
+                </li>
+              </draggable>
             </ul>
           </div>
 
@@ -412,20 +431,47 @@
                   <draggable 
                     v-model="bookMark" 
                     @start="drag=true" 
-                    @end="drag=false"
+                    @end="bookMarkTypeDragEnd"
                     :options="{
                       group:'bookmarkType',
                       animation: 500,
-                      handle: '.title'
+                      handle: '.title',
+                      scroll: true,
+                      chosenClass: 'choosed'
                     }"
                   >
                     <div class="setting-row-item" v-for="(bmItem, indexParent) in bookMark">
-                      <div class="title mid-center">
+                      <div class="title mid-center" title="鼠标按住进行拖动">
                         <i class="icon-tuodong"></i>
                         <div class="name">{{bmItem.name}}</div>
                       </div>
-                      <div class="bm-item">
-                        <BookMark :bookMarkArr="bmItem.data" @dragEnd="dragEndFun(data)"></BookMark>
+                      <div class="item-box">
+                        <draggable 
+                          v-model="bmItem.data"
+                          @end=""
+                          :options="{
+                            group:'bookmarkItem',
+                            animation: 500,
+                            filter: '.ignore-drag'
+                          }"
+                        >
+                          <div class="bm-item mid-center" v-for="(item, index) in bmItem.data">
+                            {{item.name}}
+                            <div class="icon-cha mid-center"></div>
+                          </div>
+                          <!-- 编辑 -->
+                          <div class="bm-item mid-center ignore-drag edit" title="编辑本分类名称/图标">
+                            <i class="icon-yumaobi"></i>
+                          </div>
+                          <!-- 删除 -->
+                          <div class="bm-item mid-center ignore-drag delete" title="删除本分类">
+                            <i class="icon-shanchu"></i>
+                          </div>
+                          <!-- 添加 -->
+                          <div class="bm-item mid-center ignore-drag add" title="添加本分类内容">
+                            <i class="icon-add"></i>
+                          </div>
+                        </draggable>
                       </div>
                     </div>
                   </draggable>
@@ -434,14 +480,59 @@
               <!-- 搜索引擎 -->
               <transition name="to-left">
                 <div class="setting-page superset-search" v-show="superSettingMenu[1].active">
-                  <div class="setting-row-item" v-for="(brItem, indexParent) in browserArr">
-                    <div class="title mid-center">
-                      <i class="icon-tuodong"></i>
-                      <div class="name">{{brItem.name}}</div>
+                  <draggable 
+                      v-model="bookMark" 
+                      @start="drag=true" 
+                      @end="bookMarkTypeDragEnd"
+                      :options="{
+                        group:'engineType',
+                        animation: 500,
+                        handle: '.title',
+                        scroll: true
+                      }"
+                    >
+                    <div class="setting-row-item" v-for="(brItem, indexParent) in browserArr">
+                      <div class="title mid-center">
+                        <i class="icon-tuodong"></i>
+                        <div class="name">{{brItem.name}}</div>
+                      </div>
+                      <div class="item-box">
+                        <draggable 
+                          v-model="brItem.data"
+                          @end=""
+                          :options="{
+                            group:'bookmarkItem',
+                            animation: 500,
+                            filter: '.ignore-drag'
+                          }"
+                        >
+                          <div class="bm-item mid-center" v-for="(item, index) in brItem.data">
+                            {{brItem.name}}
+                          </div>
+                          <!-- 编辑 -->
+                          <div class="bm-item mid-center ignore-drag edit" title="编辑分类名称&图标">
+                            <i class="icon-yumaobi"></i>
+                          </div>
+                          <!-- 删除 -->
+                          <div class="bm-item mid-center ignore-drag delete" title="删除本分类">
+                            <i class="icon-shanchu"></i>
+                          </div>
+                          <!-- 添加 -->
+                          <div class="bm-item mid-center ignore-drag add" title="添加本分类内容">
+                            <i class="icon-add"></i>
+                          </div>
+                        </draggable>
+                      </div>
                     </div>
-                    <div class="bm-item">
-                      <BookMark :bookMarkArr="brItem.data"></BookMark>
-                    </div>
+                  </draggable>
+                </div>
+              </transition>
+              <!-- 操作指南 -->
+              <transition name="to-left">
+                <div class="setting-page superset-search" v-show="superSettingMenu[2].active">
+                  <br><br>
+                  <div class="mid-center">
+                    <img width="30%" src="../src/assets/images/zhinanzhen.png" alt="" srcset="">
                   </div>
                 </div>
               </transition>
@@ -449,6 +540,7 @@
           <!-- 底部 -->
             <div class="btn-box mid-center">
               <myButton :btnType="'red'" @myBtnFun="sendData">放弃编辑</myButton>
+              <myButton :btnType="'blue'" @myBtnFun="sendData" class="ml20">添加分类</myButton>
               <myButton :btnType="'green'" @myBtnFun="sendData" class="ml20">保存设置</myButton>
             </div>
           </div>
@@ -504,6 +596,10 @@ export default {
         },
         {
           name: "搜索设置",
+          active: false,
+        },
+        {
+          name: "操作指南",
           active: false,
         },
       ],
@@ -608,7 +704,7 @@ export default {
           name:'图片',
           data:[
             {
-              name: "百度",
+              name: "百度1",
               url: 'https://image.baidu.com/search/index?tn=baiduimage&word=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-baidu",
@@ -620,7 +716,7 @@ export default {
               },
             },
             {
-              name: "谷歌",
+              name: "谷歌1",
               url: 'https://google.suanfazu.com/search/?q=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-google",
@@ -634,7 +730,7 @@ export default {
               },
             },
             {
-              name: "360",
+              name: "3601",
               url: 'http://image.so.com/i?q=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-360",
@@ -645,7 +741,7 @@ export default {
               resultIframeStyle: {},
             },
             {
-              name: "搜狗",
+              name: "搜狗1",
               url: 'https://pic.sogou.com/pics?query=',
               resultSrc:'',
               icon: "icon-sougou",
@@ -656,7 +752,7 @@ export default {
               resultIframeStyle: {},
             },
             {
-              name: "必应",
+              name: "必应1",
               url: 'https://cn.bing.com/images/search?q=',
               resultSrc:'',
               icon: "icon-bing",
@@ -1033,7 +1129,7 @@ export default {
         this.searchTipObj.show = true;
       }
     },
- 
+
     // 输入框失去焦点
     inputLeave: function () {
       this.searchTipObj.show = false;
@@ -1201,8 +1297,18 @@ export default {
         default:
           break;
       }
-    }
+    },
 
+    // 超级设置 拖动书签大类
+    bookMarkTypeDragEnd () {
+      // console.table(this.bookMark);
+    },
+
+    // 小书签块拖动结束回传事件
+    dragEndFun (res) {
+      this.bookMark[res.index].data = res.data;
+      // console.log(res.index);
+    }
   },
   computed: {
     // 是否展示常用书签
@@ -1221,9 +1327,9 @@ export default {
     // 必应壁纸
     this.$http.jsonp('http://bing.ioliu.cn/v1',
       {
-        // params:{
-        //   d: 20,
-        // },
+        params:{
+          d: 1,
+        },
         jsonp:'callback'
       })
       .then(function(res){
@@ -1498,7 +1604,6 @@ export default {
               cursor: pointer;
               height:30px;
               padding: 4px 8px;
-              margin-right: 10px;
               border-radius: 15px;
               transition: @animateTime;
               letter-spacing: 2px;
@@ -2239,31 +2344,76 @@ export default {
             position:absolute;
             padding: 0 20px;
             transition: @animateTime * 1.5;
+            width: 100%;
+            .choosed{
+              background: rgba(255, 255, 255, .5);
+            }
             .setting-row-item{
               display: flex;
-              padding: 20px 0;
-              &:not(:first-child){
-                border-top: 1px solid rgb(165, 165, 165);
+              padding: 10px 0;
+              margin-top: -1px;
+              border-top: 1px dashed rgb(165, 165, 165);
+              border-bottom: 1px dashed rgb(165, 165, 165);
+              &:last-child{
+                border-bottom: none;
+              }
+              &:first-child{
+                border-top: none;
               }
               .title{
                 position: relative;
                 display: flex;
-                height:100px;
-                width:40px;
-                margin:4px;
-                margin-left: 0;
+                height:60px;
+                width:24px;
                 background:linear-gradient(rgba(247, 247, 247, 0.5),rgba(255, 255, 255, 0.5),rgrgba(247, 247, 247, 0.5));
-                cursor: pointer;
+                cursor: move;
                 flex-direction: column;
                 .icon-tuodong{
                   position:absolute;
-                  top:0px;
+                  top:-1px;
                   transform: rotate(90deg);
-                  font-size: 18px;
+                  font-size: 12px;
                 }
                 .name{
                   writing-mode:vertical-lr;
-                  letter-spacing: 3px;
+                  font-size: 14px;
+                }
+              }
+              .item-box>div{
+                display: flex;
+                flex-wrap: wrap;
+                height: 100%;
+                .bm-item{
+                  position: relative;
+                  min-width: 60px;
+                  height: 60px;
+                  padding: 0 10px;
+                  background: rgba(255, 255, 255, 0.4);
+                  margin-left: 4px;
+                  margin-bottom: 4px;
+                  cursor: pointer;
+                  transition: @animateTime;
+                  font-weight: bold;
+                  &:hover{
+                    background: rgba(255, 255, 255, 0.2);
+                  }
+                  .icon-cha{
+                    position: absolute;
+                    top:0;
+                    right:0;
+                    width:20px;
+                    height:20px;
+                    font-size:12px;
+                  }
+                  &.delete{
+                    color: @main-color;
+                  }
+                  &.edit{
+                    color: @main-blue;
+                  }
+                  &.add{
+                    color: @main-green;
+                  }
                 }
               }
             }
