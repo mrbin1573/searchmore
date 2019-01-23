@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="!single">
     <draggable 
       v-model="dataCopy" 
       @start="drag=true" 
@@ -46,6 +46,21 @@
       </div>
     </draggable>
   </div>
+  <div v-else>
+    <div class="sub-menu-item" >
+      <div class="icon mid-center" :style="bookMarkArr.style">
+      <!-- <div class="icon mid-center"> -->
+        <!-- 图标 -->
+        <span class="svg" v-if="bookMarkArr.iconType == 'svg'" :class="bookMarkArr.icon"></span>
+        <!-- 文字 -->
+        <span class="txt" v-else-if="bookMarkArr.iconType == 'text'">{{bookMarkArr.icon}}</span>
+        <!-- 图片 -->
+        <img class="image" v-else-if="bookMarkArr.iconType == 'image'" :src="bookMarkArr.icon">
+      </div>
+      <span class="name">{{bookMarkArr.name}}</span>
+    </div>
+  </div>
+
 </template>
 
 <script>
@@ -53,7 +68,7 @@ import draggable from 'vuedraggable'
 
 export default {
   name: "bookMark",
-  props: ["bookMarkArr", "dataIndex", "small"],
+  props: ["bookMarkArr", "dataIndex", "small", "single"],
   components: {
     draggable
   },
@@ -151,7 +166,7 @@ export default {
       color: #fff;
     }
     .image{
-      width:60%;
+      width:100%;
     }
   }
   .name {

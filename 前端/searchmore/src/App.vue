@@ -352,18 +352,22 @@
                   <i class="icon-bookmark"></i>
                   <span class="name">常用收藏</span>
                 </span>
-                <div class="switch-three">
-                  <div class="option active mid-center" @click="stitchThree(1)">开</div>
-                  <div class="option mid-center" @click="stitchThree(2)">隐</div>
-                  <div class="option mid-center" @click="stitchThree(3)">关</div>
-                </div>
+                <MySwitchThree>
+                  <span slot="val-one">显示</span>
+                  <span slot="val-two">透明</span>
+                  <span slot="val-three">关闭</span>
+                </MySwitchThree>
               </li>
               <li title="是否显示侧边收藏夹入口">
                 <span>
                   <i class="icon-bookmarks"></i>
                   <span class="name">侧边收藏</span>
                 </span>
-                <MySwitchThree></MySwitchThree>
+                <MySwitchThree>
+                  <span slot="val-one">入口</span>
+                  <span slot="val-two">透明</span>
+                  <span slot="val-three">关闭</span>
+                </MySwitchThree>
               </li>
               <li class="cuosor_p hover-eff" title="所有的设置项"
                 @click="changeSuperSetting"
@@ -441,10 +445,25 @@
                     }"
                   >
                     <div class="setting-row-item" v-for="(bmItem, indexParent) in bookMark">
+                      <!-- 分类标题 -->
                       <div class="title mid-center" title="鼠标按住进行拖动">
                         <i class="icon-tuodong"></i>
                         <div class="name">{{bmItem.name}}</div>
                       </div>
+                      <!-- 操作分类 -->
+                      <div class="mid-center ignore-drag edit-type" title="编辑本分类名称/图标">
+                        <div class="type-edit-item mid-center add" @click="addType(indexParent)">
+                          <i class="icon-add mid-center"></i>
+                        </div>
+                        <div class="type-edit-item mid-center edit" title="修改本分类" @click="editType(indexParent)">
+                          <i class="icon-yumaobi mid-center"></i>
+                        </div>
+                        <div class="type-edit-item mid-center delete" title="删除本分类" @click="delType(indexParent)">
+                          <i class="icon-shanchu mid-center"></i>
+                        </div>
+                      </div>
+
+                      <!-- 子类 -->
                       <div class="item-box">
                         <draggable 
                           v-model="bmItem.data"
@@ -455,20 +474,26 @@
                             filter: '.ignore-drag'
                           }"
                         >
-                          <div class="bm-item mid-center" v-for="(item, index) in bmItem.data">
-                            {{item.name}}
-                            <div class="icon-cha mid-center"></div>
+                          <!-- 循环 -->
+                          <div class="bm-item" v-for="(item, indexChild) in bmItem.data">
+                            <div class="name mid-center">
+                              {{item.name}}
+                            </div>
+                            <!-- 操作 删除，修改 -->
+                            <div class="ctrl-box">
+                              <!-- 编辑 -->
+                              <div class="item edit mid-center" @click="editTypeItem(indexParent, indexChild)">
+                                <i class="icon-yumaobi"></i>
+                              </div>
+                              <!-- 删除 -->
+                              <div class="item delete mid-center" @click="delTypeItem(indexParent, indexChild)" title="删除" >
+                                <i class="icon-shanchu"></i>
+                              </div>
+                            </div>
                           </div>
-                          <!-- 编辑 -->
-                          <div class="bm-item mid-center ignore-drag edit" title="编辑本分类名称/图标">
-                            <i class="icon-yumaobi"></i>
-                          </div>
-                          <!-- 删除 -->
-                          <div class="bm-item mid-center ignore-drag delete" title="删除本分类">
-                            <i class="icon-shanchu"></i>
-                          </div>
+
                           <!-- 添加 -->
-                          <div class="bm-item mid-center ignore-drag add" title="添加本分类内容">
+                          <div class="bm-item mid-center ignore-drag add" title="添加本分类内容" @click="addTypeItem(indexParent, indexChild)">
                             <i class="icon-add"></i>
                           </div>
                         </draggable>
@@ -492,10 +517,25 @@
                       }"
                     >
                     <div class="setting-row-item" v-for="(brItem, indexParent) in browserArr">
+                      <!-- 分类标题 -->
                       <div class="title mid-center">
                         <i class="icon-tuodong"></i>
                         <div class="name">{{brItem.name}}</div>
                       </div>
+                      <!-- 操作分类 -->
+                      <div class="mid-center ignore-drag edit-type" title="编辑本分类名称/图标">
+                        <div class="type-edit-item mid-center add" @click="addType(indexParent)">
+                          <i class="icon-add mid-center"></i>
+                        </div>
+                        <div class="type-edit-item mid-center edit" title="修改本分类" @click="editType(indexParent)">
+                          <i class="icon-yumaobi mid-center"></i>
+                        </div>
+                        <div class="type-edit-item mid-center delete" title="删除本分类" @click="delType(indexParent)">
+                          <i class="icon-shanchu mid-center"></i>
+                        </div>
+                      </div>
+
+                      <!-- 子类 -->
                       <div class="item-box">
                         <draggable 
                           v-model="brItem.data"
@@ -506,16 +546,21 @@
                             filter: '.ignore-drag'
                           }"
                         >
+
+                          <!-- 循环 -->
                           <div class="bm-item mid-center" v-for="(item, index) in brItem.data">
-                            {{brItem.name}}
-                          </div>
-                          <!-- 编辑 -->
-                          <div class="bm-item mid-center ignore-drag edit" title="编辑分类名称&图标">
-                            <i class="icon-yumaobi"></i>
-                          </div>
-                          <!-- 删除 -->
-                          <div class="bm-item mid-center ignore-drag delete" title="删除本分类">
-                            <i class="icon-shanchu"></i>
+                            <div class="name mid-center">
+                              {{brItem.name}}
+                            </div>
+                             <!-- 操作 删除，修改 -->
+                            <div class="ctrl-box">
+                              <div class="item edit mid-center">
+                                <i class="icon-yumaobi"></i>
+                              </div>
+                              <div class="item delete mid-center">
+                                <i class="icon-shanchu"></i>
+                              </div>
+                            </div>
                           </div>
                           <!-- 添加 -->
                           <div class="bm-item mid-center ignore-drag add" title="添加本分类内容">
@@ -540,7 +585,7 @@
           <!-- 底部 -->
             <div class="btn-box mid-center">
               <myButton :btnType="'red'" @myBtnFun="sendData">放弃编辑</myButton>
-              <myButton :btnType="'blue'" @myBtnFun="sendData" class="ml20">添加分类</myButton>
+              <!-- <myButton :btnType="'blue'" @myBtnFun="sendData" class="ml20">添加分类</myButton> -->
               <myButton :btnType="'green'" @myBtnFun="sendData" class="ml20">保存设置</myButton>
             </div>
           </div>
@@ -550,6 +595,61 @@
       </div>
     </transition>
 
+    <!-- 添加，编辑书签 -->
+    <transition name="to-top">
+      <div class="bookmark-edit-add" v-show="bookMarksEditAddShow">
+        <div class="bm-ea-box">
+          <div class="bm-ea-content">
+            <!-- 预览 -->
+            <div class="preview-box mid-center">
+              <BookMark :bookMarkArr="bookMark[0].data[1]" :single="true"></BookMark>
+            </div>
+            <div class="bm-ea-set-detail">
+              <div class="bm-ea-detail-box">
+                <span class="name">网站名称</span>
+                <input class="input" type="text" name="" id="" v-model="bookMark[0].data[1].name">
+              </div>
+              <div class="bm-ea-detail-box">
+                <span class="name">网站网址</span>
+                <input class="input" type="text" name="" id="" v-model="bookMark[0].data[1].url">
+              </div>
+              <div class="bm-ea-detail-box">
+                <span class="name">图标设置</span>
+                <MySwitchThree class="ml8" @selectSwitchThree="selectIconType">
+                  <span slot="val-one">图片</span>
+                  <span slot="val-two">文字</span>
+                  <span slot="val-three">矢量图</span>
+                </MySwitchThree>
+              </div>
+              <div class="icontype-box mid-center">
+                <!-- 图片 -->
+                <div class="image-box mid-center">
+                  <img :src="bookMark[0].data[1].icon" alt="网站图标" srcset="">
+                  <div class="input-img icon-yumaobi  mid-center" @click="imgUploadShow = true"></div>
+                </div>
+              </div>
+            </div>
+            <!-- 底部操作按钮 -->
+            <div class="bottom-ctrl mid-center">
+              <myButton :btnType="'red'" @myBtnFun="bookMarksEditAddShow = false">放弃编辑</myButton>
+              <myButton :btnType="'green'" @myBtnFun="sendData" class="ml20">保存设置</myButton>
+            </div>
+          </div>
+          <div class="bm-ea-bg" :style="{backgroundImage: 'url(' +bgObj.src+ ')'}"></div>
+        </div>
+      </div>
+    </transition>
+
+    <!-- 图片裁剪插件 -->
+    <vueCropper
+      class="my-img-cropper"
+      ref="cropper"
+      :img="cropperOpts.img"
+      :outputType="cropperOpts.outputType"
+      :autoCrop="cropperOpts.autoCrop"
+      :fixedBox="cropperOpts.fixedBox"
+      :canMoveBox="cropperOpts.canMoveBox"
+    ></vueCropper>
   </div>
 </template>
 
@@ -560,16 +660,18 @@ import MySwitch from '../src/components/switch.vue'
 import myButton from '../src/components/myButton.vue'
 import MySwitchThree from '../src/components/switchThree.vue'
 import draggable from 'vuedraggable'
+import { VueCropper }  from 'vue-cropper' 
 
 export default {
   name: 'App',
   components: {
-    AlertBox,
-    BookMark,
-    MySwitch,
-    myButton,
-    MySwitchThree,
-    draggable
+    AlertBox,       // 弹窗
+    BookMark,       // 书签小组件
+    MySwitch,       // 双相开关
+    myButton,       // 圆角按钮
+    MySwitchThree,  // 三相开关
+    draggable,      // 拖动插件
+    VueCropper,     // 图片裁剪
   },
   data () {
     return {
@@ -587,7 +689,7 @@ export default {
       setPanelShow: false,
 
       // 超级设置显示
-      superSettingShow: true,
+      superSettingShow: false,
       // 超级设置菜单内容
       superSettingMenu :[
         {
@@ -603,8 +705,12 @@ export default {
           active: false,
         },
       ],
+
       // 搜索结果展示
       searchResultShow: false,
+
+      // 单个书签 添加编辑显示控制
+      bookMarksEditAddShow: true,
 
       // 书签子类展示
       subBookMarkShow: false,
@@ -618,12 +724,20 @@ export default {
         data: [],
         nowIndex: -1,
       },
+
       // 背景模糊
       bgBlur: false,
+
       // 输入框设置首选浏览器展示
+
       firstEngineShow: false,
+
       // 输入提交按钮，更多搜索选项展示
       moreSearchShow: false,
+
+      // 上传图片控件显示
+      imgUploadShow: false,
+
       // 搜索引擎列表
       browserArr: [
         {
@@ -768,10 +882,11 @@ export default {
           ]
         }
       ],
+
       // 书签
       bookMark: [
         {
-          name:'爱学习', // 三个字以内
+          name:'热爱学习', // 三个字以内
           icon:'icon-zaixianxuexi',
           order:'1',
           show: true,
@@ -1064,6 +1179,19 @@ export default {
           ]
         },
       ],
+
+      // 图片裁剪配置
+      cropperOpts: {
+        img: 'http://hackbinimg.luokangyuan.com/20180823130882/logowhite.gif',
+        outputType: 'png',
+        autoCrop: true,
+        // autoCropWidth: "65px",
+        // autoCropHeight: "65px",
+        fixedBox: true,
+        canMoveBox: false,
+      },
+
+
       // 搜索输入框值
       searchTxt: '',
 
@@ -1071,9 +1199,9 @@ export default {
       login() {
         alert('登录')
       },
+
       // 备份
       saveData () {
-
       },
       // 弹窗显示
       alertObj: {
@@ -1283,16 +1411,16 @@ export default {
     },
 
     // 点击三相开关
-    stitchThree: function (flag) {
+    selectIconType: function (flag) {
       switch (flag) {
-        case 1:
-          alert(1);
+        case 'left':
+          alert(flag);
           break;
-        case 2:
-          alert(2);
+        case 'center':
+          alert(flag);
           break;
-        case 3:
-          alert(3);
+        case 'right':
+          alert(flag);
           break;
         default:
           break;
@@ -1300,15 +1428,39 @@ export default {
     },
 
     // 超级设置 拖动书签大类
-    bookMarkTypeDragEnd () {
+    bookMarkTypeDragEnd: function() {
       // console.table(this.bookMark);
     },
 
     // 小书签块拖动结束回传事件
-    dragEndFun (res) {
+    dragEndFun: function (res) {
       this.bookMark[res.index].data = res.data;
       // console.log(res.index);
-    }
+    },
+
+    // 图片裁剪成功
+    cropSuccess(imgDataUrl, field){
+        console.log(imgDataUrl);
+        this.bookMark[0].data[1].icon = imgDataUrl;
+        this.imgUploadShow = false;
+				// this.imgDataUrl = imgDataUrl;
+    },
+
+    // ==========书签、引擎大类增删改============
+    addType: function (index) {
+    },
+    editType: function (index) {
+    },
+    delType: function (index) {
+    },
+    
+    // ==========书签、引擎子类增删改============
+    addTypeItem: function (indexParent, indexChild) {
+    },
+    editTypeItem: function (indexParent, indexChild) {
+    },
+    delTypeItem: function (indexParent, indexChild) {
+    },
   },
   computed: {
     // 是否展示常用书签
@@ -1328,7 +1480,7 @@ export default {
     this.$http.jsonp('http://bing.ioliu.cn/v1',
       {
         params:{
-          d: 1,
+          d: 2,
         },
         jsonp:'callback'
       })
@@ -1822,6 +1974,7 @@ export default {
       height: 30px;
     }
   }
+
   .hd-broser-list > div{
     position: fixed;
     z-index: 60;
@@ -1877,6 +2030,7 @@ export default {
       width: 100%;
     }
   }
+
   &.on-search{
     .input-search-box{
       transition: @animateTime * 1.5;
@@ -1889,6 +2043,7 @@ export default {
       }
     }
   }
+
   .book-mark{
     position:fixed;
     top:0;
@@ -2097,6 +2252,7 @@ export default {
       }
     }
   }
+
   .down-wallpapper{
     position: fixed;
     z-index: 100;
@@ -2114,6 +2270,7 @@ export default {
       opacity: .8;
     }
   }
+
   .personal{
     position: fixed;
     top:10px;
@@ -2257,6 +2414,7 @@ export default {
       }
     }
   }
+
   .setting-all{
     position:fixed;
     top:0;
@@ -2363,9 +2521,9 @@ export default {
               .title{
                 position: relative;
                 display: flex;
-                height:60px;
-                width:24px;
-                background:linear-gradient(rgba(247, 247, 247, 0.5),rgba(255, 255, 255, 0.5),rgrgba(247, 247, 247, 0.5));
+                height:auto;
+                width:34px;
+                margin: 4px 0;
                 cursor: move;
                 flex-direction: column;
                 .icon-tuodong{
@@ -2379,32 +2537,95 @@ export default {
                   font-size: 14px;
                 }
               }
+              .edit-type{
+                width: 35px;
+                min-width: 35px;
+                background:rgba(255, 255, 255, 0.4);
+                display: flex;
+                margin: 4px 0 4px 1px;
+                flex-direction: column;
+                .type-edit-item{
+                  font-size: 12px;
+                  flex-grow: 1;
+                  max-height: 35px;
+                  width:100%;
+                  cursor: pointer;
+                  transition: @animateTime;
+                  &:hover{
+                    background: rgba(0, 0, 0, 0.2);
+                    color:#fff;
+                  }
+                  &.delete{
+                    color: @main-color;
+                  }
+                  &.edit{
+                    color: @main-blue;
+                  }
+                  &.add{
+                    color: @main-green;
+                  }
+                }
+              }
               .item-box>div{
                 display: flex;
                 flex-wrap: wrap;
                 height: 100%;
                 .bm-item{
                   position: relative;
-                  min-width: 60px;
-                  height: 60px;
+                  min-width: 70px;
+                  height: 70px;
                   padding: 0 10px;
                   background: rgba(255, 255, 255, 0.4);
-                  margin-left: 4px;
-                  margin-bottom: 4px;
+                  // margin-left: 8px;
+                  margin: 4px 0 4px 8px;
                   cursor: pointer;
                   transition: @animateTime;
                   font-weight: bold;
-                  &:hover{
-                    background: rgba(255, 255, 255, 0.2);
-                  }
-                  .icon-cha{
-                    position: absolute;
+                  overflow: hidden;
+                  .name{
+                    position:absolute;
                     top:0;
-                    right:0;
-                    width:20px;
-                    height:20px;
-                    font-size:12px;
+                    left:0;
+                    width:100%;
+                    height:100%;
+                    transition: @animateTime;
                   }
+                  .ctrl-box{
+                    position: absolute;
+                    bottom:0;
+                    left:0;
+                    width:100%;
+                    height:30px;
+                    background: rgba(0, 0, 0, 0.2);
+                    display: flex;
+                    transition: @animateTime;
+                    transform: translateY(100%);
+                    .item{
+                      flex: 1 1 auto;
+                      transition: @animateTime;
+                      font-size: 14px;
+                      &.delete{
+                        color: @main-color;
+                        border-left: 1px solid rgba(255, 255, 255, 0.2);
+                      }
+                      &.edit{
+                        color: @main-blue;
+                      }
+                      &:hover{
+                        background: rgba(0, 0, 0, 0.05);
+                      }
+                    }
+                  }
+                  &:hover{
+                    // background: rgba(0, 0, 0, 0.05);
+                    .name{
+                      transform: translateY(-15px);
+                    }
+                    .ctrl-box{
+                      transform: translateY(0%);
+                    }
+                  }
+                  
                   &.delete{
                     color: @main-color;
                   }
@@ -2443,6 +2664,131 @@ export default {
         filter: blur(30px);
       }
     }
+  }
+
+  .bookmark-edit-add{
+    position: fixed;
+    top:0;
+    left:0;
+    z-index: 1000;
+    width:100%;
+    height:100%;
+    .bm-ea-box{
+      position: absolute;
+      left:50%;
+      margin-left: -200px;
+      top:50%;
+      margin-top: -250px;
+      width:400px;
+      height:500px;
+      box-shadow: @box-shadow;
+      overflow: hidden;
+      .bm-ea-content{
+        position: absolute;
+        z-index: 2;
+        top:0;
+        left:0;
+        width:100%;
+        height:100%;
+        background:rgba(255, 255, 255, .7);
+        .preview-box{
+          width: 100%;
+          height: 160px;
+        }
+        .bm-ea-set-detail{
+          padding: 0 50px;
+          .bm-ea-detail-box{
+            font-weight: bold;
+            height:40px;
+            display: flex;
+            align-items: center;
+            .name{
+              font-size: 20px;
+              color: @main-txt-color;
+              font-weight: bold;
+              user-select: none;
+            }
+            .input{
+              flex-grow: 1;
+              margin-left: 8px;;
+              width: 200px;
+              font-size: 20px;
+              color: @main-txt-color;
+              border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+              border-top: none;
+              border-left: none;
+              border-right: none;
+              background:transparent;
+              transition: @animateTime;
+              &:focus{
+                outline: none;
+                color: #000;
+                border-color: @main-color;
+              }
+            }
+          }
+          .icontype-box{
+            width:100%;
+            height: 150px;
+            border: 1px solid #ffffff;
+            .image-box{
+              position: relative;
+              width: 120px;
+              height:120px;
+              cursor: pointer;
+              overflow: hidden;
+              border-radius: 50%;
+              >img{
+                width: 100%;
+              }
+              .input-img{
+                position: absolute;
+                z-index: 10;
+                top:0;
+                left:0;
+                width:100%;
+                height:100%;
+                // border-radius: 50%;
+                transition: @animateTime;
+                background: rgba(0, 0, 0, 0.3);
+                font-size: 32px;
+                color:#fff;
+                opacity: 0;
+                &:hover{
+                  opacity: 1;
+                }
+              }
+            }
+          }
+        }
+        .bottom-ctrl{
+          position:absolute;
+          bottom:0;
+          width:100%;
+          height:60px;
+          background:rgba(255, 255, 255, 0.6);
+        }
+      }
+      .bm-ea-bg{
+        position: absolute;
+        z-index: 1;
+        left: -50vw;
+        top:-10vh;
+        width:100vw;
+        height:100vh;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        background-position: 0 0;
+        background-size: 100%;
+        filter: blur(30px);
+      }
+    }
+  }
+  .my-img-cropper{
+    position: fixed;
+    z-index: 100000;
+    width:200px;
+    height:200px;
   }
 }
 </style>
