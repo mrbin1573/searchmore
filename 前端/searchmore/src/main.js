@@ -2,15 +2,19 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue';
 import App from './App';
-import  VueResource  from 'vue-resource';
+import VueResource  from 'vue-resource';
 import Vuex from 'vuex';
 import axios from 'axios'
+import VueCropper from 'vue-cropper' 
+
 
 // 将 axios 添加的 Vue 原型上后就不需要再在每个需要使用它的页面引入了
 Vue.prototype.$http = axios;
 
 Vue.use(Vuex);
 Vue.use(VueResource);
+Vue.use(VueCropper)
+
 Vue.config.productionTip = false;
 Vue.http.options.emulateJSON = true;
 

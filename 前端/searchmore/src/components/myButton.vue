@@ -5,6 +5,8 @@
   <div v-else-if="btnType == 'green'" class="btn mid-center green" @click="clickBtn"><slot></slot></div>
   <!-- 蓝色背景 -->
   <div v-else-if="btnType == 'blue'" class="btn mid-center blue" @click="clickBtn"><slot></slot></div>
+  <!-- 灰色背景 -->
+  <div v-else class="btn mid-center gray" @click="clickBtn"><slot></slot></div>
 </template>
 
 <script>
@@ -35,6 +37,7 @@ export default {
   user-select: none;
   box-shadow: @box-shadow;
   transition: @animateTime;
+  overflow: hidden;
   cursor: pointer;
   &.blue{
     background: @main-blue;
@@ -52,6 +55,15 @@ export default {
     background: @main-color;
     &:hover{
       background: @main-color-dark;
+    }
+  }
+  &.gray{
+    background: @main-gray;
+    border-radius: 0;
+    min-width: 60px;
+    padding: 0 10px;
+    &:hover{
+      background: @main-gray-dark;
     }
   }
   &:active{

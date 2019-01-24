@@ -75,24 +75,6 @@ export default {
   data(){
     return {
       editShow: false,
-      colorArr: [
-        '#663ab6',
-        '#00bbd3',
-        '#f34236',
-        '#9b27af',
-        '#2195f2',
-        '#009587',
-        '#4bae4f',
-        '#fe9700',
-        '#fe5622',
-        '#3e50b4',
-        '#ccdb39',
-        '#fe5622',
-        '#fec007',
-        '#03a8f3',
-        '#8ac249',
-        '#5f7c8a',
-      ],
       dataCopy: this.bookMarkArr,
     }
   },

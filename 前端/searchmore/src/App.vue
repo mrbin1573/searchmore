@@ -625,7 +625,7 @@
                 <!-- 图片 -->
                 <div class="image-box mid-center">
                   <img :src="bookMark[0].data[1].icon" alt="网站图标" srcset="">
-                  <div class="input-img icon-yumaobi  mid-center" @click="imgUploadShow = true"></div>
+                  <div class="input-img icon-yumaobi  mid-center" @click="imgCropperShow = true"></div>
                 </div>
               </div>
             </div>
@@ -641,38 +641,20 @@
     </transition>
 
     <!-- 图片裁剪 -->
-    <div class="my-img-cropper-box mid-center" v-show="imgCropperShow">
-      <div class="cropper-box">
-        <div class="img-box">
-          <vueCropper
-            ref="cropper"
-            :img="cropperOpts.img"
-            :outputType="cropperOpts.outputType"
-            :autoCrop="cropperOpts.autoCrop"
-            :fixedBox="cropperOpts.fixedBox"
-            :canMoveBox="cropperOpts.canMoveBox"
-            @realTime="realTime"
-          ></vueCropper>
-        </div>
-        <div class="show-preview" :style="{'width': cropperPreview.w + 'px', 'height': cropperPreview.h + 'px',  'overflow': 'hidden',
-            'margin': '5px'}">
-          <div :style="cropperPreview.div">
-            <img :src="cropperOpts.img" :style="cropperPreview.img">
-          </div>
-        </div>
-      </div>
-    </div>
+    <imgCropper
+      :imgCropperShow="imgCropperShow"
+    ></imgCropper>
   </div>
 </template>
 
 <script>
-import AlertBox from '../src/components/alert.vue'
-import BookMark from '../src/components/bookMark.vue'
-import MySwitch from '../src/components/switch.vue'
-import myButton from '../src/components/myButton.vue'
-import MySwitchThree from '../src/components/switchThree.vue'
-import draggable from 'vuedraggable'
-import { VueCropper }  from 'vue-cropper' 
+import draggable        from 'vuedraggable'
+import AlertBox         from '../src/components/alert.vue'
+import BookMark         from '../src/components/bookMark.vue'
+import MySwitch         from '../src/components/switch.vue'
+import myButton         from '../src/components/myButton.vue'
+import MySwitchThree    from '../src/components/switchThree.vue'
+import imgCropper       from '../src/components/imgCropper' 
 
 export default {
   name: 'App',
@@ -683,7 +665,7 @@ export default {
     myButton,       // 圆角按钮
     MySwitchThree,  // 三相开关
     draggable,      // 拖动插件
-    VueCropper,     // 图片裁剪
+    imgCropper,     // 图片裁剪
   },
   data () {
     return {
@@ -723,8 +705,9 @@ export default {
 
       // 单个书签 添加编辑显示控制
       bookMarksEditAddShow: true,
+
       // 图片裁剪显示
-      imgCropperShow: false,
+      imgCropperShow: true,
 
       // 书签子类展示
       subBookMarkShow: false,
@@ -1194,18 +1177,6 @@ export default {
         },
       ],
 
-      // 图片裁剪配置
-      cropperOpts: {
-        img: 'http://hackbinimg.luokangyuan.com/searchmore/bg1.jpg',
-        outputType: 'png',
-        autoCrop: true,          // 是否默认生成截图框
-        autoCropWidth: 200,
-        autoCropHeight: 65,
-        fixedBox: true,
-        canMoveBox: false,       // 截图框能否拖动
-      },
-      cropperPreview: {},        // 预览
-
 
       // 搜索输入框值
       searchTxt: '',
@@ -1451,11 +1422,6 @@ export default {
     dragEndFun: function (res) {
       this.bookMark[res.index].data = res.data;
       // console.log(res.index);
-    },
-
-    // 图片裁剪实时预览
-    realTime: function (data) {
-      this.cropperPreview = data;
     },
 
     // ==========书签、引擎大类增删改============
@@ -2793,34 +2759,6 @@ export default {
         background-position: 0 0;
         background-size: 100%;
         filter: blur(30px);
-      }
-    }
-  }
-  .my-img-cropper-box{
-    position: fixed;
-    z-index: @zImgCropper;
-    top:0;
-    left:0;
-    width: 100%;
-    height:100%;
-    background: rgba(0, 0, 0, 0.3);
-    .cropper-box{
-      position: relative;
-      width: 600px;
-      height:500px;
-      background: #fff;
-      box-shadow: @box-shadow;
-      padding: 20px;
-      .img-box{
-        width: 300px;
-        height:300px;
-        overflow: hidden;
-      }
-      .show-preview{
-        position:absolute;
-        top:0;
-        border-radius: 50%;
-        overflow: hidden;
       }
     }
   }
