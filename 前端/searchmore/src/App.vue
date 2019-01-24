@@ -640,16 +640,28 @@
       </div>
     </transition>
 
-    <!-- 图片裁剪插件 -->
-    <vueCropper
-      class="my-img-cropper"
-      ref="cropper"
-      :img="cropperOpts.img"
-      :outputType="cropperOpts.outputType"
-      :autoCrop="cropperOpts.autoCrop"
-      :fixedBox="cropperOpts.fixedBox"
-      :canMoveBox="cropperOpts.canMoveBox"
-    ></vueCropper>
+    <!-- 图片裁剪 -->
+    <div class="my-img-cropper-box mid-center" v-show="imgCropperShow">
+      <div class="cropper-box">
+        <div class="img-box">
+          <vueCropper
+            ref="cropper"
+            :img="cropperOpts.img"
+            :outputType="cropperOpts.outputType"
+            :autoCrop="cropperOpts.autoCrop"
+            :fixedBox="cropperOpts.fixedBox"
+            :canMoveBox="cropperOpts.canMoveBox"
+            @realTime="realTime"
+          ></vueCropper>
+        </div>
+        <div class="show-preview" :style="{'width': cropperPreview.w + 'px', 'height': cropperPreview.h + 'px',  'overflow': 'hidden',
+            'margin': '5px'}">
+          <div :style="cropperPreview.div">
+            <img :src="cropperOpts.img" :style="cropperPreview.img">
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -711,6 +723,8 @@ export default {
 
       // 单个书签 添加编辑显示控制
       bookMarksEditAddShow: true,
+      // 图片裁剪显示
+      imgCropperShow: false,
 
       // 书签子类展示
       subBookMarkShow: false,
@@ -1182,14 +1196,15 @@ export default {
 
       // 图片裁剪配置
       cropperOpts: {
-        img: 'http://hackbinimg.luokangyuan.com/20180823130882/logowhite.gif',
+        img: 'http://hackbinimg.luokangyuan.com/searchmore/bg1.jpg',
         outputType: 'png',
-        autoCrop: true,
-        // autoCropWidth: "65px",
-        // autoCropHeight: "65px",
+        autoCrop: true,          // 是否默认生成截图框
+        autoCropWidth: 200,
+        autoCropHeight: 65,
         fixedBox: true,
-        canMoveBox: false,
+        canMoveBox: false,       // 截图框能否拖动
       },
+      cropperPreview: {},        // 预览
 
 
       // 搜索输入框值
@@ -1301,6 +1316,7 @@ export default {
         }
       }
     },
+
     // 百度提示
     getBaidu: function () {
       if (this.searchTxt != "") {
@@ -1332,7 +1348,6 @@ export default {
       this.searchTipObj.show = false;
       this.searchTipObj.nowIndex = indexChild;
     },
-
 
     // 键盘上
     tipUp: function () {
@@ -1438,12 +1453,9 @@ export default {
       // console.log(res.index);
     },
 
-    // 图片裁剪成功
-    cropSuccess(imgDataUrl, field){
-        console.log(imgDataUrl);
-        this.bookMark[0].data[1].icon = imgDataUrl;
-        this.imgUploadShow = false;
-				// this.imgDataUrl = imgDataUrl;
+    // 图片裁剪实时预览
+    realTime: function (data) {
+      this.cropperPreview = data;
     },
 
     // ==========书签、引擎大类增删改============
@@ -1479,9 +1491,9 @@ export default {
     // 必应壁纸
     this.$http.jsonp('http://bing.ioliu.cn/v1',
       {
-        params:{
-          d: 2,
-        },
+        // params:{
+        //   d: 5,
+        // },
         jsonp:'callback'
       })
       .then(function(res){
@@ -2784,11 +2796,33 @@ export default {
       }
     }
   }
-  .my-img-cropper{
+  .my-img-cropper-box{
     position: fixed;
-    z-index: 100000;
-    width:200px;
-    height:200px;
+    z-index: @zImgCropper;
+    top:0;
+    left:0;
+    width: 100%;
+    height:100%;
+    background: rgba(0, 0, 0, 0.3);
+    .cropper-box{
+      position: relative;
+      width: 600px;
+      height:500px;
+      background: #fff;
+      box-shadow: @box-shadow;
+      padding: 20px;
+      .img-box{
+        width: 300px;
+        height:300px;
+        overflow: hidden;
+      }
+      .show-preview{
+        position:absolute;
+        top:0;
+        border-radius: 50%;
+        overflow: hidden;
+      }
+    }
   }
 }
 </style>
