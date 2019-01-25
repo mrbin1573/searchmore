@@ -23,21 +23,23 @@
 
           <!-- 预览 -->
           <div class="preview mid-center">
-            <div class="show-preview">
+            <div class="show-preview" :style="{'width': cropperPreview.w + 'px', 'height': cropperPreview.h + 'px',  'overflow': 'hidden'}">
               <div :style="cropperPreview.div">
                 <img :src="cropperOpts.img" :style="cropperPreview.img">
               </div>
             </div>
           </div>
+          <div class="preview-title">裁剪预览</div>
 
           <!-- 操作剪切 -->
           <div class="cropper-ctrl">
             <myButton @myBtnFun="">
-              <input class="re-select-img" type="file" name="" id="" accept=".jpg,.png">
+              <input class="re-select-img" type="file" @change="chooseImg($event)" accept=".jpg,.png">
               <div class="name mid-center">重选</div>
             </myButton>
-            <myButton @myBtnFun="rotateRight" class="ml5"><i class="icon-spinner11"></i>&nbsp;90°</myButton>
-            <myButton @myBtnFun="rotateRight" class="ml5">重置</myButton>
+            <myButton @myBtnFun="rotateRight" class="ml5"><i class="icon-redo"></i></myButton>
+            <myButton @myBtnFun="rotateLeft" class="ml5"><i class="icon-undo"></i></myButton>
+            <myButton @myBtnFun="refreshCrop" class="ml5">重置</myButton>
           </div>
 
           <!-- 背景颜色 -->
@@ -56,9 +58,9 @@
           </div>
           <!-- 确认 取消 操作按钮 -->
           <div class="cropper-bottom mid-center">
-            <myButton :btnType="'red'" @myBtnFun="imgCropperShow = false">取消裁剪</myButton>
+            <myButton :btnType="'red'" @myBtnFun="hideImgCropper">取消裁剪</myButton>
             <br>
-            <myButton :btnType="'green'" @myBtnFun="" class="ml20">完成裁剪</myButton>
+            <myButton :btnType="'green'" @myBtnFun="cropperImgNow" class="ml20">完成裁剪</myButton>
           </div>
         </div>
       </transition>
@@ -76,12 +78,12 @@ export default {
     // vueCropper,     // 图片裁剪
     myButton,       // 圆角按钮
   },
-  props: ["imgCropperShow"],
+  props: ["imgCropperShow", "img"],
   data(){
     return {
       // 图片裁剪配置
       cropperOpts: {
-        img: 'http://hackbinimg.luokangyuan.com/searchmore/bg1.jpg',
+        img: this.img || 'http://hackbinimg.luokangyuan.com/20180823130898/logoblue.png',
         outputType: 'png',
         autoCrop: true,          // 是否默认生成截图框
         autoCropWidth: 200,
@@ -115,8 +117,14 @@ export default {
     }
   },
   methods: {
-    clickBtn: function () {
-      this.$emit('myBtnFun');
+    // 重新选择图片
+    chooseImg: function (e, file) {
+      var reader = new FileReader();
+      var vueThis = this;
+      reader.readAsDataURL(e.currentTarget.files[0])
+      reader.onload = function () {
+        vueThis.cropperOpts.img = this.result;
+      }
     },
     
     // =============图片裁剪====================
@@ -129,7 +137,35 @@ export default {
     rotateRight: function () {
       this.$refs.cropper.rotateRight() 
     },
-    
+    // 左旋转90
+    rotateLeft: function () {
+      this.$refs.cropper.rotateLeft() 
+    },
+
+    // 重置大小
+    refreshCrop() {
+      this.$refs.cropper.refresh()
+    },
+
+    // 裁剪
+    cropperImgNow: function () {
+      // 获取截图的base64 数据
+      this.$refs.cropper.getCropData((data) => {
+        var opts = {
+          active: 'cropper',
+          data: data
+        }
+        this.$emit('cropperCallBack', opts);
+      })
+    },
+
+    // 取消裁剪
+    hideImgCropper: function () {
+      var opts = {
+        active: 'cancel'
+      }
+      this.$emit('cropperCallBack', opts)
+    },
     // 选择颜色
     selectColor: function (index) {
       console.log(this.colorArr[index]);
@@ -177,10 +213,10 @@ export default {
       height:198px;
       background: rgba(0, 0, 0, 0.3);
       .show-preview{
-        width:150px;
-        height:150px;
+        transform: scale(.75);
         border-radius: 50%;
         overflow: hidden;
+        background:  rgba(0, 0, 0, 0.322);
       }
     }
     .cropper-ctrl{
@@ -239,6 +275,9 @@ export default {
               border: 1px solid @main-color;
             }
           }
+          &.select-color{
+            border-color: rgb(206, 206, 206);
+          }
           &:active{
             transform: scale(.85);
           }
@@ -254,6 +293,14 @@ export default {
       background: #ebebeb;
       justify-content: flex-end;
       padding:0 30px;
+    }
+    .preview-title{
+      position:absolute;
+      top:235px;
+      left:350px;
+      width: 200px;
+      text-align: center;
+      color: @main-txt-color;
     }
   }
 }

@@ -60,7 +60,7 @@ export default {
   &.gray{
     background: @main-gray;
     border-radius: 0;
-    min-width: 60px;
+    min-width: 43px;
     padding: 0 10px;
     &:hover{
       background: @main-gray-dark;

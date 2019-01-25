@@ -15,7 +15,7 @@
           :class="{afterSearch:searchResultShow}"
           ref="inputbox" 
           v-for="(searchObj, indexParent) in browserArr" 
-          v-if="searchObj.order == 0"
+          v-if="indexParent == 0"
           v-model="searchTxt"
           @keyup.enter="inputEnter(indexParent)"
           @input="getBaidu"
@@ -28,9 +28,10 @@
           <!-- 搜索按钮 -->
           <label class="searchmore-submit">
             <div class="submit-name hover-bg" 
-            v-for="(searchObj, index) in browserArr" 
-            v-if="searchObj.current"
-            @click="searchNow(index)">搜索{{searchObj.name}}</div>
+              v-for="(searchObj, index) in browserArr" 
+              v-if="searchObj.current"
+              @click="searchNow(index)"
+            >搜索{{searchObj.name}}</div>
             <!-- 其他搜索类型 -->
             <div class="more-search-opts" @mouseover="moreSearchShow = true" @mouseleave="moreSearchShow = false">
               <div class="more-trigger hover-bg">
@@ -197,12 +198,21 @@
       <!-- 常用收藏书签 -->
       <transition name="to-top">
         <div 
-        class="comom-book-mark" 
-        v-for="(bmItem, indexParent) in bookMark" 
-        v-if="bmItem.name == '常用'"
-        v-show="commonBookMarkShow"
+          class="comom-book-mark" 
+          v-for="(bmItem, indexParent) in bookMark" 
+          v-if="bmItem.name == '常用'"
+          v-show="commonBookMarkShow"
         >
-          <BookMark :bookMarkArr="bmItem.data"></BookMark>
+          <draggable 
+            v-model="bmItem.data" 
+            :options="{
+              group:'item',
+              animation: 500,
+            }"
+          >
+            <BookMark :bookMarkData="item" :bgObj="bgObj" v-for="(item, index) in bmItem.data" :key="index"></BookMark>
+          </draggable>
+          <BookMark :bookMarkData="bookMarkAddBtn"></BookMark>
         </div>
       </transition>
     </div>
@@ -242,20 +252,24 @@
     <!-- 弹窗 -->
     <AlertBox :alertObj="alertObj"></AlertBox>
 
-    <!-- 书签 -->
+    <!-- 侧边书签 -->
     <transition name="opacityShow">
       <div class="book-mark" 
-      @mouseover="subBookMarkShow = true" 
-      @mouseleave="subBookMarkShow = false"
-      v-show="this.$store.state.sideBookMarkShowState"
+        v-show="this.$store.state.sideBookMarkShowState"
       >
-        <div class="bm-content">
-          <div class="triggrt">
+        <div class="bm-content mid-center"
+          
+        >
+          <div class="triggrt" :class="{active: subBookMarkShow}">
             <i class="icon-you"></i>
           </div>
           <!-- 大类列表 -->
-          <div class="bm-list-box">
-            <ul class="bm-list">
+          <div class="bm-list-box"
+            @mouseover="subBookMarkShow = true" 
+            @mouseleave="subBookMarkShow = false"
+          >
+            <ul class="bm-list"
+            >
               <draggable 
                 v-model="bookMark"
                 @end=""
@@ -281,15 +295,27 @@
           </div>
 
           <!-- 子类弹出框 -->
-          <transition name="opacityShow">
-            <div class="sub-list-content" v-show="subBookMarkShow">
+          <transition name="to-left">
+            <div class="sub-list-content" 
+              v-show="subBookMarkShow"
+              @mouseover="subBookMarkShow = true" 
+              @mouseleave="subBookMarkShow = false"
+            >
               <div class="sub-list-box" :class="{whitebg: searchResultShow}">
                 <div class="content-box" v-for="(bmItem, indexParent) in bookMark" v-show="bmItem.show">
                   <div class="sub-box-title">
                     {{bmItem.name}}
                   </div>
                   <div class="submenu-list-box">
-                    <BookMark :bookMarkArr="bmItem.data"></BookMark>
+                    <draggable 
+                      v-model="bmItem.data" 
+                      :options="{
+                        group:'item',
+                        animation: 500,
+                      }"
+                    >
+                      <BookMark :bookMarkData="item" v-for="(item, index) in bmItem.data" :key="index"></BookMark>
+                    </draggable>
                   </div>
                 </div>
                 <div class="bm-bg-box">
@@ -602,7 +628,7 @@
           <div class="bm-ea-content">
             <!-- 预览 -->
             <div class="preview-box mid-center">
-              <BookMark :bookMarkArr="bookMark[0].data[1]" :single="true"></BookMark>
+              <!-- <BookMark :bookMarkData="bookMark[0].data[1]"></BookMark> -->
             </div>
             <div class="bm-ea-set-detail">
               <div class="bm-ea-detail-box">
@@ -641,8 +667,10 @@
     </transition>
 
     <!-- 图片裁剪 -->
+      <!-- :img="bookMark[0].data[1].icon" -->
     <imgCropper
       :imgCropperShow="imgCropperShow"
+      @cropperCallBack = "imgCropperCallBack"
     ></imgCropper>
   </div>
 </template>
@@ -704,10 +732,10 @@ export default {
       searchResultShow: false,
 
       // 单个书签 添加编辑显示控制
-      bookMarksEditAddShow: true,
+      bookMarksEditAddShow: false,
 
       // 图片裁剪显示
-      imgCropperShow: true,
+      imgCropperShow: false,
 
       // 书签子类展示
       subBookMarkShow: false,
@@ -741,13 +769,11 @@ export default {
           name:'网页', // 两个字
           active: true, // 是否可用
           current: true, // 是否当前搜索的项，不用传递到后台
-          order: 0,
           data:[
             {
               name: "百度",
               url: 'https://www.baidu.com/s?wd=',
               resultSrc:'',// 搜索结果的链接
-              order: 0,
               icon: "icon-baidu",
               iconType: 'svg',
               active: true, // 是否激活可用状态
@@ -880,6 +906,14 @@ export default {
         }
       ],
 
+      // 书签添加
+      bookMarkAddBtn: {
+        name: '添加',
+        icon: 'icon-add',
+        iconType:'svg', // 图标类型
+        style:'{"fontSize":"24px","color":"red","background":"#22be51"}',
+        url:'javascript:;'
+      },
       // 书签
       bookMark: [
         {
@@ -892,24 +926,21 @@ export default {
               name: 'csdn',
               icon: 'csdn',
               iconType:'text', // 图标类型
-              order: 1,
-              style:'font-size: 24px',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
             {
               name: 'vue',
               icon: 'https://cn.vuejs.org/images/logo.png',
               iconType:'image',
-              order: 2,
-              style:'background: #fff;',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
             {
               name: 'React',
               icon: 'React',
               iconType:'text',
-              order: 3,
-              style:'',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
           ]
@@ -925,7 +956,7 @@ export default {
               icon: '生活',
               iconType:'text',
               order: 1,
-              style:'',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
             {
@@ -933,7 +964,7 @@ export default {
               icon: '生活',
               iconType:'text',
               order: 2,
-              style:'',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
             {
@@ -941,7 +972,7 @@ export default {
               icon: '生活',
               iconType:'text',
               order: 3,
-              style:'',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
           ]
@@ -956,24 +987,21 @@ export default {
               name: '工作',
               icon: '工作',
               iconType:'text',
-              order: 1,
-              style:'',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
             {
               name: '工作',
               icon: '工作',
               iconType:'text',
-              order: 2,
-              style:'',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
             {
               name: '工作',
               icon: '工作',
               iconType:'text',
-              order: 3,
-              style:'',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
           ]
@@ -988,15 +1016,14 @@ export default {
               name: '工作',
               icon: '工作',
               iconType:'text',
-              order: 1,
-              style:'',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
             {
               name: '工作',
               icon: '工作',
               iconType:'text',
-              order: 2,
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               bgColor:'',
               url:'http://w3more.cn/'
             },
@@ -1004,8 +1031,7 @@ export default {
               name: '工作',
               icon: '工作',
               iconType:'text',
-              order: 3,
-              style:'',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
           ]
@@ -1020,21 +1046,21 @@ export default {
               name: '工作',
               icon: '工作',
               iconType:'text',
-              style:'',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
             {
               name: '工作',
               icon: '工作',
               iconType:'text',
-              style:'',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
             {
               name: '工作',
               icon: '工作',
               iconType:'text',
-              style:'',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
           ]
@@ -1049,24 +1075,21 @@ export default {
               name: '工作',
               icon: '工作',
               iconType:'text',
-              order: 1,
-              style:'',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
             {
               name: '工作',
               icon: '工作',
               iconType:'text',
-              order: 2,
-              style:'',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
             {
               name: '工作',
               icon: '工作',
               iconType:'text',
-              order: 3,
-              style:'',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
           ]
@@ -1079,98 +1102,86 @@ export default {
           data: [
             {
               name: 'vue官网',
-              icon: 'V',
-              iconType:'text',
-              order: 1,
-              style:'red',
+              icon: 'https://cn.vuejs.org/images/logo.png',
+              iconType:'image',
+              style:'{"fontSize":"24px","color":"red"}',
               url:'https://cn.vuejs.org/'
             },
             {
               name: 'github',
               icon: 'Git',
               iconType:'text',
-              order: 2,
-              style:'blue',
+              style:'{"fontSize":"24px","color":"#fff","background":"#de1a1a"}',
               url:'https://github.com/'
             },
             {
               name: '常用',
               icon: '常用',
               iconType:'text',
-              order: 3,
-              style:'green',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
             {
               name: '常用',
               icon: '常用',
               iconType:'text',
-              order: 3,
-              style:'green',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
             {
               name: '常用',
               icon: '常用',
               iconType:'text',
-              order: 4,
-              style:'yellow',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
             {
               name: '常用',
               icon: '常用',
               iconType:'text',
-              order: 5,
-              style:'purple',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
             {
               name: '常用',
               icon: '常用',
               iconType:'text',
-              order: 6,
-              style:'black',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
             {
               name: '常用',
               icon: '常用',
               iconType:'text',
-              order: 7,
-              style:'green',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
             {
               name: '常用',
               icon: '常用',
               iconType:'text',
-              order: 8,
-              style:'blue',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
             {
               name: '常用',
               icon: '常用',
               iconType:'text',
-              order: 9,
-              style:'red',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
             {
               name: '常用',
               icon: '常用',
               iconType:'text',
-              order: 10,
-              style:'gray',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
             {
               name: '常用',
               icon: '常用',
               iconType:'text',
-              order: 11,
-              style:'orange',
+              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
               url:'http://w3more.cn/'
             },
           ]
@@ -1418,10 +1429,29 @@ export default {
       // console.table(this.bookMark);
     },
 
+    // 小书签
+    dragEnd () {
+      // 传回数据到父级
+      // this.$emit('dragEnd', {data: this.dataCopy, index:this.dataIndex});
+    },
+
     // 小书签块拖动结束回传事件
-    dragEndFun: function (res) {
-      this.bookMark[res.index].data = res.data;
-      // console.log(res.index);
+    // dragEndFun: function (res) {
+    //   this.bookMark[res.index].data = res.data;
+    //   // console.log(res.index);
+    // },
+
+    // ========== 图片裁剪回调 ============
+    imgCropperCallBack: function (opts) {
+      // 确认裁剪
+      if( opts.active == "cropper") {
+        this.imgCropperShow = false;
+        this.bookMark[0].data[1].icon = opts.data;
+      } else
+      // 取消裁剪
+      if( opts.active == "cancel" ) {
+        this.imgCropperShow = false;
+      }
     },
 
     // ==========书签、引擎大类增删改============
@@ -1445,7 +1475,8 @@ export default {
     commonBookMarkShow: function () {
       return !(this.inputFocusBool || this.searchResultShow) && this.$store.state.commonBookMarkShowState;
       // return this.$store.state.commonBookMarkShowState;
-    }
+    },
+
   },
   // 判断移动端
   beforeCreate () {
@@ -1454,12 +1485,13 @@ export default {
       window.location.href="https://www.baidu.com";
     }
 
-    // 必应壁纸
+    var wallpapperDay = Math.random() * 50;
+    // 必应壁纸 http://bing.ioliu.cn/v1
     this.$http.jsonp('http://bing.ioliu.cn/v1',
       {
-        // params:{
-        //   d: 5,
-        // },
+        params:{
+          d: wallpapperDay,
+        },
         jsonp:'callback'
       })
       .then(function(res){
@@ -1475,6 +1507,8 @@ export default {
         console.log('失败')
         console.log(res);
       });
+  },
+  mounted: function () {
   },
   watch: {
     alertObj: {
@@ -1853,7 +1887,7 @@ export default {
       width: 648px + 4px + 13px; // 加上两边margin + 滚动条
       height: 216px;
       overflow-y: auto;
-      // background: #dedede;
+      overflow-x: hidden;
       display: flex;
       flex-wrap: wrap;
       // .item{
@@ -2031,22 +2065,16 @@ export default {
     z-index: 150;
     height: 100%;
     width: 100px;
+    border-right: 1px solid @main-color;
     box-shadow: @box-shadow;
     transition: @animateTime;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
     &:hover{
       transform: translateX(0%);
-      .bm-content{
-        .triggrt{
-          transform: rotate(180deg);
-          margin-left: 50px;
-          // background: rgba(255, 255, 255, 0.2) !important;
-        }
-      }
     }
     .bm-content{
-      position: absolute;
       width:100%;
-      height:100%;
       z-index: 200;
       .triggrt{
         position: absolute;
@@ -2067,18 +2095,22 @@ export default {
         background: @main-color;
         transition:@animateTime;
         transform-origin: 50% 50%;
+        &.active{
+          transform: rotate(180deg);
+          margin-left: 50px;
+        }
       }
       .bm-list-box{
         position: relative;
         z-index: 120;
         width:100%;
-        height:100%;
-        background: rgb(22, 22, 22);
-        border-right: 2px solid @main-color;
+        // height:100%;
+        background: rgba(22, 22, 22, 0.452);
         display: flex;
         align-items: center;
+        overflow: hidden;
         .bm-list{
-          height:100%;
+          // height:100%;
           width:100%;
           display: flex;
           flex-direction: column;
@@ -2096,20 +2128,24 @@ export default {
             cursor: pointer;
             font-weight: bold;
             color:#fff;
+            background: rgba(0, 0, 0, 0.7);
             user-select: none;
             .touch,>i{
               height: 50px;
               line-height: 50px;
             }
             .touch{
-              margin-right: 10px;
-              color: rgb(209, 209, 209);
+              margin-right: 2px;
+              margin-left:2px;
+              color: rgba(209, 209, 209, 0.712);
               &:hover{
+                color: rgb(209, 209, 209);
                 cursor: move;
               }
             }
             .menu-name{
               margin-left: 3px;
+              white-space: nowrap;
             }
             &:first-child{
               border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -2123,30 +2159,28 @@ export default {
       .sub-list-content{
         position: fixed;
         z-index: 120;
-        // background:rgb(51, 51, 51);
-        // width: 800px;
         width: 70vw;
         height:80vh;
         top:50%;
         left: 100px;
         margin-top: -40vh;
-        // width: 100vw;
-        // height:100%;
         .sub-list-box{
           position: relative;
           margin-left: 40px;
           height:80vh;
           overflow: hidden;
           box-shadow: 5px 0 50px rgba(0, 0, 0, 0.3);
-          background:rgba(255, 255, 255, 0.9);
+          // background:rgba(255, 255, 255, 0.9);
           &.whitebg{
             background: rgb(255, 255, 255);
           }
           .content-box{
             position: absolute;
+            width:100%;
             z-index:100;
             display: flex;
             flex-direction: row;
+            background:rgba(255, 255, 255, 0.7);
             .sub-box-title{
               display: flex;
               align-items: center;
@@ -2219,11 +2253,8 @@ export default {
               background-attachment: fixed;
               background-repeat: no-repeat;
               background-position: center;
-              // background-color: #fff;
               background-size: 100%;
-              // transform: scale(1.1);
-              opacity: .8;
-              filter: blur(50px) brightness(1.5);
+              filter: blur(30px);
             }
           }
         }
@@ -2713,6 +2744,7 @@ export default {
               position: relative;
               width: 120px;
               height:120px;
+              border: 1px solid rgba(0, 0, 0, 0.2);
               cursor: pointer;
               overflow: hidden;
               border-radius: 50%;
