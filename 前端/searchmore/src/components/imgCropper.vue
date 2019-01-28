@@ -69,13 +69,11 @@
 </template>
 
 <script>
-// import { vueCropper }   from 'vue-cropper' 
-import myButton         from './myButton.vue'
+import myButton from './myButton.vue'
 
 export default {
   name: "imgCropper",
   components: {
-    // vueCropper,     // 图片裁剪
     myButton,       // 圆角按钮
   },
   props: ["imgCropperShow", "img"],

@@ -1,5 +1,6 @@
 <template>
   <div id="searchmore-content" :class="searchResultShow == true ? 'on-search' : ''">
+    
     <div class="searchmore-box">
       <!-- <div class="searchmore-logo-box">
         <span class="searchmore-name">杉木搜索</span>
@@ -210,9 +211,17 @@
               animation: 500,
             }"
           >
-            <BookMark :bookMarkData="item" :bgObj="bgObj" v-for="(item, index) in bmItem.data" :key="index"></BookMark>
+            <BookMark 
+              v-for="(item, indexChild) in bmItem.data" 
+              :bookMarkData="item"
+              :indexParent="indexParent"
+              :indexChild="indexChild"
+              :key="indexChild" 
+              :bgObj="bgObj"
+              @bookMarkCallBack="bookMarkCallBackFun"
+            ></BookMark>
           </draggable>
-          <BookMark :bookMarkData="bookMarkAddBtn"></BookMark>
+          <BookMark :bookMarkData="bookMarkAddBtn" :bgObj="bgObj"></BookMark>
         </div>
       </transition>
     </div>
@@ -254,12 +263,10 @@
 
     <!-- 侧边书签 -->
     <transition name="opacityShow">
-      <div class="book-mark" 
+      <div class="side-book-mark as-opacity" 
         v-show="this.$store.state.sideBookMarkShowState"
       >
-        <div class="bm-content mid-center"
-          
-        >
+        <div class="bm-content mid-center">
           <div class="triggrt" :class="{active: subBookMarkShow}">
             <i class="icon-you"></i>
           </div>
@@ -281,10 +288,10 @@
               >
                 <li  
                   draggable="true" 
-                  class="bm-item hover-bg" 
+                  class="bm-item" 
                   v-for="(bmItem, index) in bookMark" 
                   @mouseover="hoverBookMark(index)"
-                  :style="{order:bmItem.order}"
+                  :title="bmItem.name"
                 >
                   <div class="touch icon-tuodong"></div>
                   <i :class="bmItem.icon"></i>
@@ -295,9 +302,10 @@
           </div>
 
           <!-- 子类弹出框 -->
+          <!-- v-show="subBookMarkShow" -->
           <transition name="to-left">
             <div class="sub-list-content" 
-              v-show="subBookMarkShow"
+              v-show="true"
               @mouseover="subBookMarkShow = true" 
               @mouseleave="subBookMarkShow = false"
             >
@@ -628,17 +636,24 @@
           <div class="bm-ea-content">
             <!-- 预览 -->
             <div class="preview-box mid-center">
-              <!-- <BookMark :bookMarkData="bookMark[0].data[1]"></BookMark> -->
+              <BookMark :bookMarkData="bookMark[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild]"></BookMark>
             </div>
+
             <div class="bm-ea-set-detail">
+              
+              <!-- 名称 -->
               <div class="bm-ea-detail-box">
                 <span class="name">网站名称</span>
-                <input class="input" type="text" name="" id="" v-model="bookMark[0].data[1].name">
+                <input class="input" type="text" name="" id="" v-model="bookMark[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].name">
               </div>
+
+              <!-- 地址 -->
               <div class="bm-ea-detail-box">
                 <span class="name">网站网址</span>
-                <input class="input" type="text" name="" id="" v-model="bookMark[0].data[1].url">
+                <input class="input" type="text" name="" id="" v-model="bookMark[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].url">
               </div>
+
+              <!-- 图标类型设置 -->
               <div class="bm-ea-detail-box">
                 <span class="name">图标设置</span>
                 <MySwitchThree class="ml8" @selectSwitchThree="selectIconType">
@@ -647,10 +662,12 @@
                   <span slot="val-three">矢量图</span>
                 </MySwitchThree>
               </div>
+
+              <!-- 图标类型 -->
               <div class="icontype-box mid-center">
                 <!-- 图片 -->
                 <div class="image-box mid-center">
-                  <img :src="bookMark[0].data[1].icon" alt="网站图标" srcset="">
+                  <img :src="bookMark[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].icon" alt="网站图标" srcset="">
                   <div class="input-img icon-yumaobi  mid-center" @click="imgCropperShow = true"></div>
                 </div>
               </div>
@@ -733,6 +750,11 @@ export default {
 
       // 单个书签 添加编辑显示控制
       bookMarksEditAddShow: false,
+      // 单个书签显示时 传入的数据
+      singleBookMarkData: {
+        indexParent: 0,
+        indexChild: 0,
+      },
 
       // 图片裁剪显示
       imgCropperShow: false,
@@ -1441,6 +1463,25 @@ export default {
     //   // console.log(res.index);
     // },
 
+    // 书签组件点击回调
+    bookMarkCallBackFun (resObj) {
+      switch (resObj.type) {
+        case 'edit':
+          this.bookMarksEditAddShow = true;
+          this.singleBookMarkData.indexParent = resObj.indexParent;
+          this.singleBookMarkData.indexChild = resObj.indexChild;
+          console.log(this.singleBookMarkData)
+          break;
+
+        case 'delete':
+          alert('删除');
+          break;
+      
+        default:
+          break;
+      }
+    },
+
     // ========== 图片裁剪回调 ============
     imgCropperCallBack: function (opts) {
       // 确认裁剪
@@ -1485,7 +1526,7 @@ export default {
       window.location.href="https://www.baidu.com";
     }
 
-    var wallpapperDay = Math.random() * 50;
+    var wallpapperDay = Math.floor(Math.random() * 100);
     // 必应壁纸 http://bing.ioliu.cn/v1
     this.$http.jsonp('http://bing.ioliu.cn/v1',
       {
@@ -1881,7 +1922,6 @@ export default {
     .comom-book-mark{
       position: fixed;
       left: 50%;
-      // top: calc(~'40vh + 60px');
       top: 50vh;
       margin-left: -320px - 4px; // 减去item的margin
       width: 648px + 4px + 13px; // 加上两边margin + 滚动条
@@ -1890,49 +1930,6 @@ export default {
       overflow-x: hidden;
       display: flex;
       flex-wrap: wrap;
-      // .item{
-      //   width: 100px;
-      //   height:100px;
-      //   margin-left: 8px;
-      //   margin-bottom: 8px;
-      //   background: rgba(0, 0, 0, 0.3);
-      //   cursor: pointer;
-      //   transition: @animateTime;
-      //   display: flex;
-      //   flex-direction: column;
-      //   align-items: center;
-      //   justify-content: center;
-      //   transition: @animateTime;
-      //   user-select: none;
-      //   text-decoration: none;
-      //   .icon{
-      //     width: 55px;
-      //     height: 55px;
-      //     border-radius: 50%;
-      //     background: rgba(0, 0, 0, 0.322);
-      //     .txt{
-      //       color: #fff;
-      //     }
-      //     .image{
-      //       max-width: 55px;
-      //       max-height: 55px;
-      //     }
-      //   }
-      //   .name{
-      //     color:#fff;
-      //     margin-top: 5px;
-      //   }
-      //   &:active{
-      //     transform: scale(.9);
-      //   }
-      //   &:hover{
-      //     background: rgba(48, 48, 48, 0.3);
-      //     box-shadow: @box-shadow;
-      //   }
-      //   &:nth-child(6n + 1){
-      //     margin-left: 0;
-      //   }
-      // }
     }
     .search-result-content{
       position: fixed;
@@ -2056,7 +2053,7 @@ export default {
     }
   }
 
-  .book-mark{
+  .side-book-mark{
     position:fixed;
     top:0;
     left:0;
@@ -2104,7 +2101,6 @@ export default {
         position: relative;
         z-index: 120;
         width:100%;
-        // height:100%;
         background: rgba(22, 22, 22, 0.452);
         display: flex;
         align-items: center;
@@ -2151,7 +2147,7 @@ export default {
               border-top: 1px solid rgba(255, 255, 255, 0.1);
             }
             &:hover{
-              background:rgba(255, 255, 255, .5);
+              background: @main-color-dark;
             }
           }
         }
@@ -2200,41 +2196,6 @@ export default {
               padding: 20px;
               overflow: auto;
               height:80vh;
-              .sub-menu-item{
-                width:100px;
-                height:100px;
-                margin:2px;
-                float: left;
-                background: rgba(0, 0, 0, 0.3);
-                cursor: pointer;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                transition: @animateTime;
-                user-select: none;
-                text-decoration: none;
-                .icon{
-                  width: 55px;
-                  height: 55px;
-                  border-radius: 50%;
-                  background: rgba(0, 0, 0, 0.322);
-                  .icon-txt{
-                    color: #fff;
-                  }
-                }
-                .name{
-                  color:#fff;
-                  margin-top: 5px;
-                }
-                &:active{
-                  transform: scale(.9);
-                }
-                &:hover{
-                  background: rgba(48, 48, 48, 0.3);
-                  box-shadow: @box-shadow;
-                }
-              }
             }
           }
           .bm-bg-box{
@@ -2257,6 +2218,48 @@ export default {
               filter: blur(30px);
             }
           }
+        }
+      }
+    }
+    &.as-opacity{
+      transform: translateX(0%);
+      background: transparent;
+      border: none;
+      box-shadow: 0 0 0 transparent;
+      .bm-content{
+        .triggrt{
+          display: none;
+        }
+        .bm-list-box{
+          background: transparent;
+          .bm-list{
+            .bm-item{
+              background: transparent;
+              border: none;
+              &:hover{
+                i{
+                  font-size: 30px;
+                  opacity: 1;
+                  // color: @main-color;
+                }
+              }
+              i{
+                font-size: 30px;
+                opacity: .3;
+                transition: @animateTime;
+                padding-left: 10px;
+              }
+              .touch{
+                display: none;
+              }
+              .menu-name{
+                opacity: 0;
+              }
+            }
+          }
+        }
+        .sub-list-content{
+          margin-left: -50px;
         }
       }
     }
