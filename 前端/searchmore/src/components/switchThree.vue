@@ -1,16 +1,16 @@
 <template>
   <!-- 三相开关 -->
   <div class="switch-three">
-    <div class="option active mid-center" @click="selectThis('left')"><slot name="val-one">0</slot></div>
-    <div class="option mid-center"        @click="selectThis('center')"><slot name="val-two">1</slot></div>
-    <div class="option mid-center"        @click="selectThis('right')"><slot name="val-three">2</slot></div>
+    <div class="option mid-center" :class="{active: activeIndex == 0}" @click="selectThis('left')"><slot name="val-one">0</slot></div>
+    <div class="option mid-center" :class="{active: activeIndex == 1}" @click="selectThis('center')"><slot name="val-two">1</slot></div>
+    <div class="option mid-center" :class="{active: activeIndex == 2}" @click="selectThis('right')"><slot name="val-three">2</slot></div>
   </div>
 </template>
 
 <script>
 export default {
   name: "swicthThree",
-  props: ["switchChecked", "switchName", "switchId", "changeData"],
+  props: ["activeIndex"],
   data(){
     return {
     }

@@ -185,6 +185,13 @@
         <!-- 结果iframe -->
         <div class="result-iframe-content" v-for="resultObj in browserArr" v-if="resultObj.current">
           <transition-group name="to-bottom" tag="div">
+            <!-- <iframe class="iframe-item" 
+            v-for="resultItemFrame in resultObj.data"
+            v-show="resultItemFrame.current == true && resultItemFrame.active == true"
+            :key="resultItemFrame.icon"
+            :style="resultItemFrame.resultIframeStyle"
+            :src="resultItemFrame.resultSrc"
+            frameborder="0"></iframe> -->
             <iframe class="iframe-item" 
             v-for="resultItemFrame in resultObj.data"
             v-show="resultItemFrame.current == true && resultItemFrame.active == true"
@@ -199,8 +206,9 @@
       <!-- 常用收藏书签 -->
       <transition name="to-top">
         <div 
-          class="comom-book-mark" 
-          v-for="(bmItem, indexParent) in bookMark" 
+          class="comom-book-mark"
+          :class="commonDisplayStyle"
+          v-for="(bmItem, indexParent) in bookMark.data" 
           v-if="bmItem.name == '常用'"
           v-show="commonBookMarkShow"
         >
@@ -221,7 +229,7 @@
               @bookMarkCallBack="bookMarkCallBackFun"
             ></BookMark>
           </draggable>
-          <BookMark :bookMarkData="bookMarkAddBtn" :bgObj="bgObj"></BookMark>
+          <!-- <BookMark :bookMarkData="bookMarkAddBtn" :bgObj="bgObj"></BookMark> -->
         </div>
       </transition>
     </div>
@@ -264,21 +272,21 @@
     <!-- 侧边书签 -->
     <transition name="opacityShow">
       <div class="side-book-mark as-opacity" 
-        v-show="this.$store.state.sideBookMarkShowState"
+        v-if="bookMark.sideDisplay != 2"
       >
         <div class="bm-content mid-center">
           <div class="triggrt" :class="{active: subBookMarkShow}">
             <i class="icon-you"></i>
           </div>
           <!-- 大类列表 -->
-          <div class="bm-list-box"
+          <div class="bm-list-box clearfix"
             @mouseover="subBookMarkShow = true" 
             @mouseleave="subBookMarkShow = false"
           >
             <ul class="bm-list"
             >
               <draggable 
-                v-model="bookMark"
+                v-model="bookMark.data"
                 @end=""
                 :options="{
                   group:'leftBookMark',
@@ -289,7 +297,7 @@
                 <li  
                   draggable="true" 
                   class="bm-item" 
-                  v-for="(bmItem, index) in bookMark" 
+                  v-for="(bmItem, index) in bookMark.data" 
                   @mouseover="hoverBookMark(index)"
                   :title="bmItem.name"
                 >
@@ -305,26 +313,27 @@
           <!-- v-show="subBookMarkShow" -->
           <transition name="to-left">
             <div class="sub-list-content" 
-              v-show="true"
+              v-show="subBookMarkShow"
               @mouseover="subBookMarkShow = true" 
               @mouseleave="subBookMarkShow = false"
             >
               <div class="sub-list-box" :class="{whitebg: searchResultShow}">
-                <div class="content-box" v-for="(bmItem, indexParent) in bookMark" v-show="bmItem.show">
+
+                <div class="content-box" v-for="(bmItem, indexParent) in bookMark.data" v-show="bmItem.show">
                   <div class="sub-box-title">
                     {{bmItem.name}}
                   </div>
-                  <div class="submenu-list-box">
-                    <draggable 
-                      v-model="bmItem.data" 
-                      :options="{
-                        group:'item',
-                        animation: 500,
-                      }"
-                    >
-                      <BookMark :bookMarkData="item" v-for="(item, index) in bmItem.data" :key="index"></BookMark>
-                    </draggable>
-                  </div>
+                    <div class="submenu-list-box" key="indexParent" v-show="bmItem.show">
+                      <draggable 
+                        v-model="bmItem.data" 
+                        :options="{
+                          group:'item',
+                          animation: 500,
+                        }"
+                      >
+                          <BookMark :bookMarkData="item" :key="index"  v-for="(item, index) in bmItem.data"></BookMark>
+                      </draggable>
+                    </div>
                 </div>
                 <div class="bm-bg-box">
                   <div class="bm-bg" v-show="!searchResultShow" :style="{backgroundImage: 'url(' +bgObj.src+ ')'}"></div>
@@ -381,15 +390,15 @@
           <!-- 设置列表 -->
           <div class="u-settings">
             <ul>
-              <li title="是否在搜索栏底下显示常用收藏">
+              <li>
                 <span>
                   <i class="icon-bookmark"></i>
                   <span class="name">常用收藏</span>
                 </span>
-                <MySwitchThree>
-                  <span slot="val-one">显示</span>
-                  <span slot="val-two">透明</span>
-                  <span slot="val-three">关闭</span>
+                <MySwitchThree :activeIndex="bookMark.commonDisplay" @selectSwitchThree="commonBookMarkChange">
+                  <span slot="val-one" title="展示首页收藏">显示</span>
+                  <span slot="val-two" title="首页收藏设为透明，鼠标覆盖显示">透明</span>
+                  <span slot="val-three" title="彻底关闭首页收藏">关闭</span>
                 </MySwitchThree>
               </li>
               <li title="是否显示侧边收藏夹入口">
@@ -397,9 +406,9 @@
                   <i class="icon-bookmarks"></i>
                   <span class="name">侧边收藏</span>
                 </span>
-                <MySwitchThree>
-                  <span slot="val-one">入口</span>
-                  <span slot="val-two">透明</span>
+                <MySwitchThree :activeIndex="bookMark.sideDisplay" @selectSwitchThree="sideBookMarkChange">
+                  <span slot="val-one">侧边</span>
+                  <span slot="val-two">图标</span>
                   <span slot="val-three">关闭</span>
                 </MySwitchThree>
               </li>
@@ -467,7 +476,7 @@
               <transition name="to-left">
                 <div class="setting-page superset-book-mark" v-show="superSettingMenu[0].active">
                   <draggable 
-                    v-model="bookMark" 
+                    v-model="bookMark.data" 
                     @start="drag=true" 
                     @end="bookMarkTypeDragEnd"
                     :options="{
@@ -478,7 +487,7 @@
                       chosenClass: 'choosed'
                     }"
                   >
-                    <div class="setting-row-item" v-for="(bmItem, indexParent) in bookMark">
+                    <div class="setting-row-item" v-for="(bmItem, indexParent) in bookMark.data">
                       <!-- 分类标题 -->
                       <div class="title mid-center" title="鼠标按住进行拖动">
                         <i class="icon-tuodong"></i>
@@ -540,7 +549,7 @@
               <transition name="to-left">
                 <div class="setting-page superset-search" v-show="superSettingMenu[1].active">
                   <draggable 
-                      v-model="bookMark" 
+                      v-model="bookMark.data" 
                       @start="drag=true" 
                       @end="bookMarkTypeDragEnd"
                       :options="{
@@ -636,7 +645,7 @@
           <div class="bm-ea-content">
             <!-- 预览 -->
             <div class="preview-box mid-center">
-              <BookMark :bookMarkData="bookMark[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild]"></BookMark>
+              <BookMark :bookMarkData="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild]"></BookMark>
             </div>
 
             <div class="bm-ea-set-detail">
@@ -644,13 +653,13 @@
               <!-- 名称 -->
               <div class="bm-ea-detail-box">
                 <span class="name">网站名称</span>
-                <input class="input" type="text" name="" id="" v-model="bookMark[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].name">
+                <input class="input" type="text" name="" id="" v-model="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].name">
               </div>
 
               <!-- 地址 -->
               <div class="bm-ea-detail-box">
                 <span class="name">网站网址</span>
-                <input class="input" type="text" name="" id="" v-model="bookMark[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].url">
+                <input class="input" type="text" name="" id="" v-model="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].url">
               </div>
 
               <!-- 图标类型设置 -->
@@ -667,7 +676,7 @@
               <div class="icontype-box mid-center">
                 <!-- 图片 -->
                 <div class="image-box mid-center">
-                  <img :src="bookMark[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].icon" alt="网站图标" srcset="">
+                  <img :src="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].icon" alt="网站图标" srcset="">
                   <div class="input-img icon-yumaobi  mid-center" @click="imgCropperShow = true"></div>
                 </div>
               </div>
@@ -684,7 +693,7 @@
     </transition>
 
     <!-- 图片裁剪 -->
-      <!-- :img="bookMark[0].data[1].icon" -->
+      <!-- :img="bookMark.data[0].data[1].icon" -->
     <imgCropper
       :imgCropperShow="imgCropperShow"
       @cropperCallBack = "imgCropperCallBack"
@@ -805,8 +814,8 @@ export default {
               },
             },
             {
-              name: "谷歌",
-              url: 'https://www.google.com/search?q=',
+              name: "Yandex",
+              url: 'https://yandex.com/search/?text=',
               resultSrc:'',// 搜索结果的链接
               icon: "icon-google",
               iconType: 'svg',
@@ -925,6 +934,75 @@ export default {
               },
             }
           ]
+        },
+        {
+          active: true,
+          current: false,
+          name:'音乐',
+          data:[
+            {
+              name: "酷狗",
+              url: 'https://www.kugou.com/yy/html/search.html#searchType=song&searchKeyWord=',
+              resultSrc:'',// 搜索结果的链接
+              icon: "icon-baidu",
+              iconType: 'svg',
+              active: true, // 是否激活可用状态
+              current: true, // 是否为当前选中显示搜索结果页面
+              iconColor: "#3385ff", // 图标颜色
+              resultIframeStyle: { //搜索结果的单独样式
+              },
+            },
+            {
+              name: "网易云音乐",
+              url: 'https://music.163.com/#/search/m/?s=',
+              resultSrc:'',// 搜索结果的链接
+              icon: "icon-google",
+              iconType: 'svg',
+              active: true,
+              current: false,
+              iconColor: "rgb(251, 188, 5)",
+              resultIframeStyle: { //搜索结果的单独样式
+                marginTop: '-53px',
+                height:'calc(100% + 53px)'
+              },
+            },
+            {
+              name: "QQ音乐",
+              url: 'https://y.qq.com/portal/search.html#page=1&searchid=1&remoteplace=txt.yqq.top&t=song&w=',
+              resultSrc:'',// 搜索结果的链接
+              icon: "icon-360",
+              iconType: 'svg',
+              active: true,
+              current: false,
+              iconColor: "#1bc550",
+              resultIframeStyle: {},
+            },
+            {
+              name: "千千音乐",
+              url: 'http://music.taihe.com/search?key=',
+              resultSrc:'',
+              icon: "icon-sougou",
+              iconType: 'svg',
+              active: true,
+              current: false,
+              iconColor: "#f84a19",
+              resultIframeStyle: {},
+            },
+            {
+              name: "虾米音乐",
+              url: 'https://www.xiami.com/search?key=',
+              resultSrc:'',
+              icon: "icon-bing",
+              iconType: 'svg',
+              active: true,
+              current: false,
+              iconColor: "#007daa",
+              resultIframeStyle: { //搜索结果的单独样式
+                marginTop: '-35px',
+                height:'calc(100% + 35px)'
+              },
+            }
+          ]
         }
       ],
 
@@ -937,278 +1015,269 @@ export default {
         url:'javascript:;'
       },
       // 书签
-      bookMark: [
-        {
-          name:'热爱学习', // 三个字以内
-          icon:'icon-zaixianxuexi',
-          order:'1',
-          show: true,
-          data: [
-            {
-              name: 'csdn',
-              icon: 'csdn',
-              iconType:'text', // 图标类型
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-            {
-              name: 'vue',
-              icon: 'https://cn.vuejs.org/images/logo.png',
-              iconType:'image',
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-            {
-              name: 'React',
-              icon: 'React',
-              iconType:'text',
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-          ]
-        },
-        {
-          name:'生活',
-          icon:'icon-kafei',
-          order:'2',
-          show: false,
-          data: [
-            {
-              name: '生活',
-              icon: '生活',
-              iconType:'text',
-              order: 1,
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-            {
-              name: '生活',
-              icon: '生活',
-              iconType:'text',
-              order: 2,
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-            {
-              name: '生活',
-              icon: '生活',
-              iconType:'text',
-              order: 3,
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-          ]
-        },
-        {
-          name:'工作',
-          icon:'icon-gongzuo',
-          order:'3',
-          show: false,
-          data: [
-            {
-              name: '工作',
-              icon: '工作',
-              iconType:'text',
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-            {
-              name: '工作',
-              icon: '工作',
-              iconType:'text',
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-            {
-              name: '工作',
-              icon: '工作',
-              iconType:'text',
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-          ]
-        },
-        {
-          name:'工作4',
-          icon:'icon-gongzuo',
-          order:'4',
-          show: false,
-          data: [
-            {
-              name: '工作',
-              icon: '工作',
-              iconType:'text',
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-            {
-              name: '工作',
-              icon: '工作',
-              iconType:'text',
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              bgColor:'',
-              url:'http://w3more.cn/'
-            },
-            {
-              name: '工作',
-              icon: '工作',
-              iconType:'text',
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-          ]
-        },
-        {
-          name:'工作6',
-          icon:'icon-gongzuo',
-          order:'6',
-          show: false,
-          data: [
-            {
-              name: '工作',
-              icon: '工作',
-              iconType:'text',
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-            {
-              name: '工作',
-              icon: '工作',
-              iconType:'text',
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-            {
-              name: '工作',
-              icon: '工作',
-              iconType:'text',
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-          ]
-        },
-        {
-          name:'工作5',
-          icon:'icon-gongzuo',
-          order:'5',
-          show: false,
-          data: [
-            {
-              name: '工作',
-              icon: '工作',
-              iconType:'text',
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-            {
-              name: '工作',
-              icon: '工作',
-              iconType:'text',
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-            {
-              name: '工作',
-              icon: '工作',
-              iconType:'text',
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-          ]
-        },
-        {
-          name:'常用',
-          icon:'icon-gongzuo',
-          order:'6',
-          show: false,
-          data: [
-            {
-              name: 'vue官网',
-              icon: 'https://cn.vuejs.org/images/logo.png',
-              iconType:'image',
-              style:'{"fontSize":"24px","color":"red"}',
-              url:'https://cn.vuejs.org/'
-            },
-            {
-              name: 'github',
-              icon: 'Git',
-              iconType:'text',
-              style:'{"fontSize":"24px","color":"#fff","background":"#de1a1a"}',
-              url:'https://github.com/'
-            },
-            {
-              name: '常用',
-              icon: '常用',
-              iconType:'text',
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-            {
-              name: '常用',
-              icon: '常用',
-              iconType:'text',
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-            {
-              name: '常用',
-              icon: '常用',
-              iconType:'text',
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-            {
-              name: '常用',
-              icon: '常用',
-              iconType:'text',
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-            {
-              name: '常用',
-              icon: '常用',
-              iconType:'text',
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-            {
-              name: '常用',
-              icon: '常用',
-              iconType:'text',
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-            {
-              name: '常用',
-              icon: '常用',
-              iconType:'text',
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-            {
-              name: '常用',
-              icon: '常用',
-              iconType:'text',
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-            {
-              name: '常用',
-              icon: '常用',
-              iconType:'text',
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-            {
-              name: '常用',
-              icon: '常用',
-              iconType:'text',
-              style:'{"fontSize":"24px","color":"red","background":"#fff"}',
-              url:'http://w3more.cn/'
-            },
-          ]
-        },
-      ],
+      bookMark: {
+        sideDisplay: 0,    // 控制侧边书签显示方式，0：显示入口，1：仅显示图标，2：完全隐藏
+        commonDisplay: 0 , // 控制常用书签是否显示，0：正常显示，1：透明，但鼠标覆盖显示，2：完全隐藏
+        position: 3,       //侧边书签位置，0,1,2,3 上右下左
+        data:[
+          {
+            name:'热爱学习', // 三个字以内
+            icon:'icon-zaixianxuexi',
+            order:'1',
+            show: true,
+            data: [
+              {
+                name: 'csdn',
+                icon: 'csdn',
+                iconType:'text', // 图标类型
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              },
+              {
+                name: 'vue',
+                icon: 'https://cn.vuejs.org/images/logo.png',
+                iconType:'image',
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              },
+              {
+                name: 'React',
+                icon: 'React',
+                iconType:'text',
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              },
+            ]
+          },
+          {
+            name:'生活',
+            icon:'icon-kafei',
+            order:'2',
+            show: false,
+            data: [
+              {
+                name: '生活',
+                icon: '生活',
+                iconType:'text',
+                order: 1,
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              },
+              {
+                name: '生活',
+                icon: '生活',
+                iconType:'text',
+                order: 2,
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              },
+              {
+                name: '生活',
+                icon: '生活',
+                iconType:'text',
+                order: 3,
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              },
+            ]
+          },
+          {
+            name:'工作',
+            icon:'icon-display',
+            order:'3',
+            show: false,
+            data: [
+              {
+                name: '工作',
+                icon: '工作',
+                iconType:'text',
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              },
+              {
+                name: '工作',
+                icon: '工作',
+                iconType:'text',
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              },
+              {
+                name: '工作',
+                icon: '工作',
+                iconType:'text',
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              },
+            ]
+          },
+          {
+            name:'工作4',
+            icon:'icon-bug',
+            order:'4',
+            show: false,
+            data: [
+              {
+                name: '工作',
+                icon: '工作',
+                iconType:'text',
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              },
+              {
+                name: '工作',
+                icon: '工作',
+                iconType:'text',
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                bgColor:'',
+                url:'http://w3more.cn/'
+              },
+              {
+                name: '工作',
+                icon: '工作',
+                iconType:'text',
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              },
+            ]
+          },
+          {
+            name:'工作6',
+            icon:'icon-pie-chart',
+            order:'6',
+            show: false,
+            data: [
+              {
+                name: '工作',
+                icon: '工作',
+                iconType:'text',
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              },
+              {
+                name: '工作',
+                icon: '工作',
+                iconType:'text',
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              },
+              {
+                name: '工作',
+                icon: '工作',
+                iconType:'text',
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              },
+            ]
+          },
+          {
+            name:'工作5',
+            icon:'icon-calendar',
+            order:'5',
+            show: false,
+            data: [
+              {
+                name: '工作',
+                icon: '工作',
+                iconType:'text',
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              },
+              {
+                name: '工作',
+                icon: '工作',
+                iconType:'text',
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              },
+              {
+                name: '工作',
+                icon: '工作',
+                iconType:'text',
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              },
+            ]
+          },
+          {
+            name:'常用',
+            icon:'icon-telegram',
+            order:'6',
+            show: false,
+            data: [
+              {
+                name: 'vue官网',
+                icon: 'https://cn.vuejs.org/images/logo.png',
+                iconType:'image',
+                style:'{"fontSize":"24px","color":"red"}',
+                url:'https://cn.vuejs.org/'
+              },
+              {
+                name: 'github',
+                icon: 'Git',
+                iconType:'text',
+                style:'{"fontSize":"24px","color":"#fff","background":"#de1a1a"}',
+                url:'https://github.com/'
+              },
+              {
+                name: '常用',
+                icon: '常用',
+                iconType:'text',
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              },
+              {
+                name: '常用',
+                icon: '常用',
+                iconType:'text',
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              },
+              {
+                name: '常用',
+                icon: '常用',
+                iconType:'text',
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              },
+              {
+                name: '常用',
+                icon: '常用',
+                iconType:'text',
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              },
+              {
+                name: '常用',
+                icon: '常用',
+                iconType:'text',
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              },
+              {
+                name: '常用',
+                icon: '常用',
+                iconType:'text',
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              },
+              {
+                name: '常用',
+                icon: '常用',
+                iconType:'text',
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              },
+              {
+                name: '常用',
+                icon: '常用',
+                iconType:'text',
+                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                url:'http://w3more.cn/'
+              }
+            ]
+          },
+        ]
+      },
 
 
       // 搜索输入框值
@@ -1245,6 +1314,14 @@ export default {
             for (let j=0; j<currentObj.data.length; j++) {
               if(currentObj.data[j].current == true) {
                 currentObj.data[j].resultSrc = currentObj.data[j].url + this.searchTxt;
+                // this.$axios.get(currentObj.data[j].resultSrc)
+                //   .then(function (response) {
+                //   　console.log("成功")
+                //     console.log(response)
+                //   }).catch(function (error) {
+                //   　console.log("失败")
+                //   　console.log(error)
+                //   });
               }
             }
           } else {
@@ -1390,11 +1467,11 @@ export default {
 
     // 鼠标覆盖便签大类
     hoverBookMark: function (index) {
-      for(let i=0; i<this.bookMark.length; i++) {
+      for(let i=0; i<this.bookMark.data.length; i++) {
         if(i == index) {
-          this.bookMark[i].show = true;
+          this.bookMark.data[i].show = true;
         } else {
-          this.bookMark[i].show = false;
+          this.bookMark.data[i].show = false;
         }
       }
     },
@@ -1429,7 +1506,8 @@ export default {
       this.superSettingShow = !this.superSettingShow;
     },
 
-    // 点击三相开关
+    // ==================点击三相开关==========================
+    // 设置图标类型
     selectIconType: function (flag) {
       switch (flag) {
         case 'left':
@@ -1445,10 +1523,42 @@ export default {
           break;
       }
     },
+    // 设置常用收藏显示方式
+    commonBookMarkChange: function (flag) {
+      switch (flag) {
+        case 'left':
+          this.bookMark.commonDisplay = 0; // 显示
+          break;
+        case 'center':
+          this.bookMark.commonDisplay = 1;  // 透明
+          break;
+        case 'right':
+          this.bookMark.commonDisplay = 2;  // 隐藏
+          break;
+        default:
+          break;
+      }
+    },
+    // 设置侧边收藏显示方式
+    sideBookMarkChange: function (flag) {
+      switch (flag) {
+        case 'left':
+          this.bookMark.sideDisplay = 0; // 显示入口
+          break;
+        case 'center':
+          this.bookMark.sideDisplay = 1;  // 透明
+          break;
+        case 'right':
+          this.bookMark.sideDisplay = 2;  // 隐藏
+          break;
+        default:
+          break;
+      }
+    },
 
     // 超级设置 拖动书签大类
     bookMarkTypeDragEnd: function() {
-      // console.table(this.bookMark);
+      // console.table(this.bookMark.data);
     },
 
     // 小书签
@@ -1459,7 +1569,7 @@ export default {
 
     // 小书签块拖动结束回传事件
     // dragEndFun: function (res) {
-    //   this.bookMark[res.index].data = res.data;
+    //   this.bookMark.data[res.index].data = res.data;
     //   // console.log(res.index);
     // },
 
@@ -1487,7 +1597,7 @@ export default {
       // 确认裁剪
       if( opts.active == "cropper") {
         this.imgCropperShow = false;
-        this.bookMark[0].data[1].icon = opts.data;
+        this.bookMark.data[0].data[1].icon = opts.data;
       } else
       // 取消裁剪
       if( opts.active == "cancel" ) {
@@ -1514,9 +1624,24 @@ export default {
   computed: {
     // 是否展示常用书签
     commonBookMarkShow: function () {
-      return !(this.inputFocusBool || this.searchResultShow) && this.$store.state.commonBookMarkShowState;
-      // return this.$store.state.commonBookMarkShowState;
+      return !(this.inputFocusBool || this.searchResultShow || this.bookMark.commonDisplay === 2);
     },
+
+    // 常用书签展示方式class
+    commonDisplayStyle: function () {
+      // 显示
+      if (this.bookMark.commonDisplay === 0) {
+        return '';
+      }
+      // 透明
+      else if (this.bookMark.commonDisplay === 1) {
+        return 'as-opacity';
+      } 
+      // 关闭
+      else {
+        return 'hide';
+      }
+    }
 
   },
   // 判断移动端
@@ -1530,9 +1655,7 @@ export default {
     // 必应壁纸 http://bing.ioliu.cn/v1
     this.$http.jsonp('http://bing.ioliu.cn/v1',
       {
-        params:{
-          d: wallpapperDay,
-        },
+        params:{d:wallpapperDay},
         jsonp:'callback'
       })
       .then(function(res){
@@ -1930,6 +2053,13 @@ export default {
       overflow-x: hidden;
       display: flex;
       flex-wrap: wrap;
+      transition: @animateTime;
+      &.as-opacity{
+        opacity: 0;
+        &:hover{
+          opacity: 1;
+        }
+      }
     }
     .search-result-content{
       position: fixed;
@@ -2058,11 +2188,11 @@ export default {
     top:0;
     left:0;
     transform: translateX(-99%);
-    // transform: translateX(0%);
+    transform: translateX(0%);
     z-index: 150;
     height: 100%;
     width: 100px;
-    border-right: 1px solid @main-color;
+    // border-right: 1px solid @main-color;
     box-shadow: @box-shadow;
     transition: @animateTime;
     background: rgba(0, 0, 0, 0.3);
@@ -2112,42 +2242,46 @@ export default {
           flex-direction: column;
           justify-content: center;
           align-items: center;
-          .bm-item{
-            position: relative;
-            display: flex;
-            list-style-type: none;
-            height:50px;
-            line-height: 50px;
+          >div{
             width:100%;
-            text-align: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            cursor: pointer;
-            font-weight: bold;
-            color:#fff;
-            background: rgba(0, 0, 0, 0.7);
-            user-select: none;
-            .touch,>i{
-              height: 50px;
+            .bm-item{
+              position: relative;
+              display: flex;
+              list-style-type: none;
+              height:50px;
               line-height: 50px;
-            }
-            .touch{
-              margin-right: 2px;
-              margin-left:2px;
-              color: rgba(209, 209, 209, 0.712);
-              &:hover{
-                color: rgb(209, 209, 209);
-                cursor: move;
+              width:100%;
+              text-align: center;
+              border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+              cursor: pointer;
+              font-weight: bold;
+              color:#fff;
+              background: rgba(0, 0, 0, 0.7);
+              user-select: none;
+              .touch,>i{
+                height: 50px;
+                line-height: 50px;
               }
-            }
-            .menu-name{
-              margin-left: 3px;
-              white-space: nowrap;
-            }
-            &:first-child{
-              border-top: 1px solid rgba(255, 255, 255, 0.1);
-            }
-            &:hover{
-              background: @main-color-dark;
+              .touch{
+                margin-right: 2px;
+                margin-left:2px;
+                color: rgba(209, 209, 209, 0.712);
+                &:hover{
+                  color: rgb(209, 209, 209);
+                  cursor: move;
+                }
+              }
+              .menu-name{
+                margin-left: 3px;
+                white-space: nowrap;
+                font-size: 12px;
+              }
+              &:first-child{
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+              }
+              &:hover{
+                background: @main-color-dark;
+              }
             }
           }
         }
@@ -2155,23 +2289,27 @@ export default {
       .sub-list-content{
         position: fixed;
         z-index: 120;
-        width: 70vw;
-        height:80vh;
-        top:50%;
-        left: 100px;
-        margin-top: -40vh;
+        margin-left: 100px;
+        width: 100vw;
+        height:100vh;
+        top:0;
+        left: 0;
+        // background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
         .sub-list-box{
           position: relative;
-          margin-left: 40px;
-          height:80vh;
+          min-height:148px;
+          max-width: 836px;
           overflow: hidden;
-          box-shadow: 5px 0 50px rgba(0, 0, 0, 0.3);
-          // background:rgba(255, 255, 255, 0.9);
+          // padding-left: 20px;
+          // box-shadow: 5px 0 50px rgba(0, 0, 0, 0.3);
+          transition: @animateTime;
           &.whitebg{
             background: rgb(255, 255, 255);
           }
           .content-box{
-            position: absolute;
+            position: relative;
             width:100%;
             z-index:100;
             display: flex;
@@ -2182,7 +2320,7 @@ export default {
               align-items: center;
               justify-content: center;
               width:40px;
-              height:80vh;
+              // height: 100%;
               background: @main-color;
               color: #fff;
               font-size: 20px;
@@ -2192,14 +2330,17 @@ export default {
             }
             .submenu-list-box{
               width:calc(~'100% - 40px');
-              height:100%;
+              // height:100%;
               padding: 20px;
               overflow: auto;
-              height:80vh;
+              // height:80vh;
             }
           }
           .bm-bg-box{
             position: absolute;
+            top:0;
+            left: 20px;
+            margin-top: -25%;
             width: 100vw;
             height:100vh;
             z-index: 10;
@@ -2259,7 +2400,7 @@ export default {
           }
         }
         .sub-list-content{
-          margin-left: -50px;
+          // margin-left: -50px;
         }
       }
     }
