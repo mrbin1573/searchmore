@@ -640,12 +640,15 @@
 
     <!-- 添加，编辑书签 -->
     <transition name="to-top">
-      <div class="bookmark-edit-add" v-show="bookMarksEditAddShow">
+      <div class="bookmark-edit-add" v-show="!bookMarksEditAddShow">
         <div class="bm-ea-box">
           <div class="bm-ea-content">
             <!-- 预览 -->
             <div class="preview-box mid-center">
-              <BookMark :bookMarkData="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild]"></BookMark>
+              <BookMark 
+                :bookMarkData="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild]"
+                :edit='false'
+              ></BookMark>
             </div>
 
             <div class="bm-ea-set-detail">
@@ -665,7 +668,7 @@
               <!-- 图标类型设置 -->
               <div class="bm-ea-detail-box">
                 <span class="name">图标设置</span>
-                <MySwitchThree class="ml8" @selectSwitchThree="selectIconType">
+                <MySwitchThree  :activeIndex="bookMarkType2SwitchThreeType" class="ml8" @selectSwitchThree="selectIconType">
                   <span slot="val-one">图片</span>
                   <span slot="val-two">文字</span>
                   <span slot="val-three">矢量图</span>
@@ -673,13 +676,53 @@
               </div>
 
               <!-- 图标类型 -->
-              <div class="icontype-box mid-center">
+              <div class="icontype-box mid-center" 
+                v-show="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].iconType == 'image'">
                 <!-- 图片 -->
                 <div class="image-box mid-center">
-                  <img :src="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].icon" alt="网站图标" srcset="">
+                  <img 
+                    v-if="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].iconType == 'image'" 
+                    :src="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].icon" 
+                    alt="网站图标">
+                  <img 
+                    v-else 
+                    src="http://hackbinimg.luokangyuan.com/20180823130898/logoblue.png" 
+                    alt="网站图标">
                   <div class="input-img icon-yumaobi  mid-center" @click="imgCropperShow = true"></div>
                 </div>
               </div>
+
+              <!-- 文字类型 -->
+              <div v-show="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].iconType == 'text'">
+                <!-- 文字 -->
+                <div class="bm-ea-detail-box">
+                  <span class="name">图标文字</span>
+                  <input class="input" type="text" name="" id="" v-model="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].icon">
+                </div>
+                <!-- 大小 -->
+                <div class="bm-ea-detail-box">
+                  <span class="name">文字大小</span>
+                  <vue-slider 
+                    ref="slider" 
+                    v-model="vueSliderValue"
+                    v-bind="vueSliderOption"
+                    @drag="vueSliderDrag"
+                  ></vue-slider>
+                </div>
+                <!-- 颜色 -->
+                <div class="bm-ea-detail-box">
+                  <span class="name">背景颜色</span>
+                  <div class="input">
+                    <div class="color-item mid-center" 
+                      v-for="(item, index) in colorArr"
+                      :class="{active: index == bookMarkBgActiveIndex}"
+                      :style="{backgroundColor:item}"
+                      @click="chooseBookMarkBgColor(index)"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
             </div>
             <!-- 底部操作按钮 -->
             <div class="bottom-ctrl mid-center">
@@ -709,6 +752,7 @@ import MySwitch         from '../src/components/switch.vue'
 import myButton         from '../src/components/myButton.vue'
 import MySwitchThree    from '../src/components/switchThree.vue'
 import imgCropper       from '../src/components/imgCropper' 
+import vueSlider from 'vue-slider-component'
 
 export default {
   name: 'App',
@@ -720,6 +764,7 @@ export default {
     MySwitchThree,  // 三相开关
     draggable,      // 拖动插件
     imgCropper,     // 图片裁剪
+    vueSlider,      // 滑动组件
   },
   data () {
     return {
@@ -730,6 +775,23 @@ export default {
         // src: 'http://hackbinimg.luokangyuan.com/searchmore/bg1.jpg'
       },
 
+      // 编辑添加书签 样式 临时变量
+      itemStyleObjTmp: {"fontSize":"24px","background":"#000"},
+
+      // 滑动组件的默认值
+      vueSliderValue: 12,
+      // 滑动组件初始化值
+      vueSliderOption: {
+        width: 212,
+        height: 5,
+        dotSize: 20,
+        interval: 2,
+        tooltipDir: 'right',
+        min: 12,
+        max: 30,
+      },
+      // 变价添加书签，背景颜色选中index
+      bookMarkBgActiveIndex: -1,
       // 输入框聚焦
       inputFocusBool: false,
       
@@ -793,6 +855,24 @@ export default {
 
       // 上传图片控件显示
       imgUploadShow: false,
+      
+      // 颜色
+      colorArr: [
+        '#2195f2',
+        '#03a8f3',
+        '#00bbd3',
+        '#009587',
+        '#4bae4f',
+        '#8ac249',
+        '#ccdb39',
+        '#fec007',
+        '#fe9700',
+        '#fe5622',
+        '#f34236',
+        '#9b27af',
+        '#663ab6',
+        'rgba(0, 0, 0, 0.3)',
+      ],
 
       // 搜索引擎列表
       browserArr: [
@@ -1030,21 +1110,21 @@ export default {
                 name: 'csdn',
                 icon: 'csdn',
                 iconType:'text', // 图标类型
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               },
               {
                 name: 'vue',
                 icon: 'https://cn.vuejs.org/images/logo.png',
                 iconType:'image',
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               },
               {
                 name: 'React',
                 icon: 'React',
                 iconType:'text',
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               },
             ]
@@ -1060,7 +1140,7 @@ export default {
                 icon: '生活',
                 iconType:'text',
                 order: 1,
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               },
               {
@@ -1068,7 +1148,7 @@ export default {
                 icon: '生活',
                 iconType:'text',
                 order: 2,
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               },
               {
@@ -1076,7 +1156,7 @@ export default {
                 icon: '生活',
                 iconType:'text',
                 order: 3,
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               },
             ]
@@ -1091,21 +1171,21 @@ export default {
                 name: '工作',
                 icon: '工作',
                 iconType:'text',
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               },
               {
                 name: '工作',
                 icon: '工作',
                 iconType:'text',
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               },
               {
                 name: '工作',
                 icon: '工作',
                 iconType:'text',
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               },
             ]
@@ -1120,14 +1200,14 @@ export default {
                 name: '工作',
                 icon: '工作',
                 iconType:'text',
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               },
               {
                 name: '工作',
                 icon: '工作',
                 iconType:'text',
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 bgColor:'',
                 url:'http://w3more.cn/'
               },
@@ -1135,7 +1215,7 @@ export default {
                 name: '工作',
                 icon: '工作',
                 iconType:'text',
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               },
             ]
@@ -1150,21 +1230,21 @@ export default {
                 name: '工作',
                 icon: '工作',
                 iconType:'text',
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               },
               {
                 name: '工作',
                 icon: '工作',
                 iconType:'text',
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               },
               {
                 name: '工作',
                 icon: '工作',
                 iconType:'text',
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               },
             ]
@@ -1179,21 +1259,21 @@ export default {
                 name: '工作',
                 icon: '工作',
                 iconType:'text',
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               },
               {
                 name: '工作',
                 icon: '工作',
                 iconType:'text',
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               },
               {
                 name: '工作',
                 icon: '工作',
                 iconType:'text',
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               },
             ]
@@ -1222,56 +1302,56 @@ export default {
                 name: '常用',
                 icon: '常用',
                 iconType:'text',
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               },
               {
                 name: '常用',
                 icon: '常用',
                 iconType:'text',
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               },
               {
                 name: '常用',
                 icon: '常用',
                 iconType:'text',
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               },
               {
                 name: '常用',
                 icon: '常用',
                 iconType:'text',
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               },
               {
                 name: '常用',
                 icon: '常用',
                 iconType:'text',
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               },
               {
                 name: '常用',
                 icon: '常用',
                 iconType:'text',
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               },
               {
                 name: '常用',
                 icon: '常用',
                 iconType:'text',
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               },
               {
                 name: '常用',
                 icon: '常用',
                 iconType:'text',
-                style:'{"fontSize":"24px","color":"red","background":"#fff"}',
+                style:'{"fontSize":"24px","background":"#000"}',
                 url:'http://w3more.cn/'
               }
             ]
@@ -1291,6 +1371,7 @@ export default {
       // 备份
       saveData () {
       },
+
       // 弹窗显示
       alertObj: {
         show: false,
@@ -1506,18 +1587,19 @@ export default {
       this.superSettingShow = !this.superSettingShow;
     },
 
+
     // ==================点击三相开关==========================
     // 设置图标类型
     selectIconType: function (flag) {
       switch (flag) {
         case 'left':
-          alert(flag);
+          this.bookMark.data[this.singleBookMarkData.indexParent].data[this.singleBookMarkData.indexChild].iconType = 'image';
           break;
         case 'center':
-          alert(flag);
+          this.bookMark.data[this.singleBookMarkData.indexParent].data[this.singleBookMarkData.indexChild].iconType = 'text';
           break;
         case 'right':
-          alert(flag);
+          this.bookMark.data[this.singleBookMarkData.indexParent].data[this.singleBookMarkData.indexChild].iconType = 'svg';
           break;
         default:
           break;
@@ -1561,28 +1643,18 @@ export default {
       // console.table(this.bookMark.data);
     },
 
-    // 小书签
-    dragEnd () {
-      // 传回数据到父级
-      // this.$emit('dragEnd', {data: this.dataCopy, index:this.dataIndex});
-    },
-
-    // 小书签块拖动结束回传事件
-    // dragEndFun: function (res) {
-    //   this.bookMark.data[res.index].data = res.data;
-    //   // console.log(res.index);
-    // },
-
     // 书签组件点击回调
     bookMarkCallBackFun (resObj) {
       switch (resObj.type) {
+        // 编辑
         case 'edit':
           this.bookMarksEditAddShow = true;
           this.singleBookMarkData.indexParent = resObj.indexParent;
           this.singleBookMarkData.indexChild = resObj.indexChild;
-          console.log(this.singleBookMarkData)
+          this.itemStyleObjTmp = JSON.parse(this.bookMark.data[resObj.indexParent].data[resObj.indexChild].style);
+          
           break;
-
+        // 删除
         case 'delete':
           alert('删除');
           break;
@@ -1620,6 +1692,22 @@ export default {
     },
     delTypeItem: function (indexParent, indexChild) {
     },
+
+        
+    // 切换书签编辑添加背景颜色
+    chooseBookMarkBgColor: function (index) {
+      this.bookMarkBgActiveIndex = index;
+      this.itemStyleObjTmp.background = this.colorArr[index];
+      this.bookMark.data[this.singleBookMarkData.indexParent].data[this.singleBookMarkData.indexChild].style = JSON.stringify(this.itemStyleObjTmp);
+    },
+
+    // 拖动滑动条
+    vueSliderDrag () {
+      this.itemStyleObjTmp.fontSize = this.vueSliderValue + 'px';
+      this.bookMark
+      .data[this.singleBookMarkData.indexParent]
+      .data[this.singleBookMarkData.indexChild].style = JSON.stringify(this.itemStyleObjTmp);
+    }
   },
   computed: {
     // 是否展示常用书签
@@ -1641,7 +1729,21 @@ export default {
       else {
         return 'hide';
       }
-    }
+    },
+
+    // 书签类型转化为三相开关
+    bookMarkType2SwitchThreeType: function () {
+      var itemIconType = this.bookMark.data[this.singleBookMarkData.indexParent].data[this.singleBookMarkData.indexChild].iconType;
+      if (itemIconType == 'image') {
+        return 0;
+      }
+      else if (itemIconType == 'text') {
+        return 1;
+      }
+      else if (itemIconType == 'svg') {
+        return 2;
+      }
+    },
 
   },
   // 判断移动端
@@ -2866,17 +2968,39 @@ export default {
               margin-left: 8px;;
               width: 200px;
               font-size: 20px;
-              color: @main-txt-color;
-              border-bottom: 1px solid rgba(255, 255, 255, 0.6);
               border-top: none;
               border-left: none;
               border-right: none;
               background:transparent;
               transition: @animateTime;
+              &[type="text"]{
+                color: @main-txt-color;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+              }
               &:focus{
                 outline: none;
                 color: #000;
                 border-color: @main-color;
+              }
+              .color-item{
+                width: 20px;
+                height: 20px;
+                float: left;
+                margin: 2px;
+                background: red;
+                cursor: pointer;
+                transition: @animateTime;
+                &.active{
+                  transform: scale(.8);
+                  &::after{
+                    content: "";
+                    position: absolute;
+                    width: 20px;
+                    height: 20px;
+                    transform: scale(1.25);
+                    border: 1px solid #de1a1a;
+                  }
+                }
               }
             }
           }

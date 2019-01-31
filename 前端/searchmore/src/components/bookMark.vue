@@ -18,7 +18,7 @@
 
     <!-- 操作 -->
     <transition name="opacityShow">
-      <div class="mookmark-ctrl-box" v-show="editShow">
+      <div class="mookmark-ctrl-box" v-show="editShow" v-if="edit != false">
         <transition name="to-right">
           <div class="bookmark-ctrl-item mid-center icon-yumaobi" v-show="editShow" @click="editBookMark"></div>
         </transition>
@@ -35,7 +35,7 @@
 <script>
 export default {
   name: "bookMark",
-  props: ["bookMarkData", "indexParent", "indexChild", "bgObj"],
+  props: ["bookMarkData", "indexParent", "indexChild", "bgObj", "edit"],
   data(){
     return {
       editShow: false,
