@@ -43,6 +43,7 @@ export default {
       padding: 0 8px;
       cursor:pointer;
       transition: @animateTime;
+      user-select: none;
       &:not(:first-child){
         border-left: 1px solid rgba(0, 0, 0, 0.1);
       }

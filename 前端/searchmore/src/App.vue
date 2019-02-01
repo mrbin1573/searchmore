@@ -640,7 +640,7 @@
 
     <!-- 添加，编辑书签 -->
     <transition name="to-top">
-      <div class="bookmark-edit-add" v-show="!bookMarksEditAddShow">
+      <div class="bookmark-edit-add" v-if="bookMarksEditAddShow">
         <div class="bm-ea-box">
           <div class="bm-ea-content">
             <!-- 预览 -->
@@ -656,13 +656,13 @@
               <!-- 名称 -->
               <div class="bm-ea-detail-box">
                 <span class="name">网站名称</span>
-                <input class="input" type="text" name="" id="" v-model="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].name">
+                <input class="input" maxlength="15" type="text" name="" id="" v-model="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].name">
               </div>
 
               <!-- 地址 -->
               <div class="bm-ea-detail-box">
                 <span class="name">网站网址</span>
-                <input class="input" type="text" name="" id="" v-model="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].url">
+                <input class="input" maxlength="50" type="text" name="" id="" v-model="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].url">
               </div>
 
               <!-- 图标类型设置 -->
@@ -674,33 +674,22 @@
                   <span slot="val-three">矢量图</span>
                 </MySwitchThree>
               </div>
-
-              <!-- 图标类型 -->
-              <div class="icontype-box mid-center" 
-                v-show="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].iconType == 'image'">
-                <!-- 图片 -->
-                <div class="image-box mid-center">
-                  <img 
-                    v-if="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].iconType == 'image'" 
-                    :src="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].icon" 
-                    alt="网站图标">
-                  <img 
-                    v-else 
-                    src="http://hackbinimg.luokangyuan.com/20180823130898/logoblue.png" 
-                    alt="网站图标">
-                  <div class="input-img icon-yumaobi  mid-center" @click="imgCropperShow = true"></div>
+              <!-- 颜色 -->
+              <div class="bm-ea-detail-box">
+                <span class="name">背景颜色</span>
+                <div class="input">
+                  <div class="color-item mid-center" 
+                    v-for="(item, index) in colorArr"
+                    :class="{active: index == bookMarkBgActiveIndex}"
+                    :style="{backgroundColor:item}"
+                    @click="chooseBookMarkBgColor(index)"
+                  ></div>
                 </div>
               </div>
-
-              <!-- 文字类型 -->
-              <div v-show="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].iconType == 'text'">
-                <!-- 文字 -->
-                <div class="bm-ea-detail-box">
-                  <span class="name">图标文字</span>
-                  <input class="input" type="text" name="" id="" v-model="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].icon">
-                </div>
-                <!-- 大小 -->
-                <div class="bm-ea-detail-box">
+              <!-- 文字大小 -->
+              <transition name="to-left">
+                <div class="bm-ea-detail-box"
+                v-if="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].iconType != 'image'">
                   <span class="name">文字大小</span>
                   <vue-slider 
                     ref="slider" 
@@ -709,21 +698,49 @@
                     @drag="vueSliderDrag"
                   ></vue-slider>
                 </div>
-                <!-- 颜色 -->
-                <div class="bm-ea-detail-box">
-                  <span class="name">背景颜色</span>
-                  <div class="input">
-                    <div class="color-item mid-center" 
-                      v-for="(item, index) in colorArr"
-                      :class="{active: index == bookMarkBgActiveIndex}"
-                      :style="{backgroundColor:item}"
-                      @click="chooseBookMarkBgColor(index)"
-                    ></div>
+              </transition>
+
+              <!-- 图标类型 -->
+              <transition name="to-left">
+                <div class="icontype-box mid-center" 
+                  v-if="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].iconType == 'image'">
+                  <!-- 图片 -->
+                  <div class="image-box mid-center">
+                    <img 
+                      :src="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].icon" 
+                      alt="网站图标">
+                    <!-- <img 
+                      v-else 
+                      src="http://hackbinimg.luokangyuan.com/20180823130898/logoblue.png" 
+                      alt="网站图标"> -->
+                    <div class="input-img icon-yumaobi mid-center" @click="imgCropperShow = true"></div>
                   </div>
                 </div>
-              </div>
+              </transition>
 
+              <!-- 文字类型 -->
+              <transition name="to-left">
+                <div class="txt-type-box" v-if="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].iconType == 'text'">
+                  <!-- 文字 -->
+                  <div class="bm-ea-detail-box">
+                    <span class="name">图标文字</span>
+                    <input class="input" maxlength="15" type="text" v-model="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].icon">
+                  </div>
+                </div>
+              </transition>
+
+              <!-- 矢量图类型 -->
+              <transition name="to-left">
+                <div class="txt-type-box" v-if="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].iconType == 'svg'">
+                  <!-- 图标 -->
+                  <div class="bm-ea-detail-box">
+                    <span class="name">图标选择</span>
+                    <input class="input" readonly maxlength="15" type="text" v-model="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].icon">
+                  </div>
+                </div>
+              </transition>
             </div>
+
             <!-- 底部操作按钮 -->
             <div class="bottom-ctrl mid-center">
               <myButton :btnType="'red'" @myBtnFun="bookMarksEditAddShow = false">放弃编辑</myButton>
@@ -736,9 +753,10 @@
     </transition>
 
     <!-- 图片裁剪 -->
-      <!-- :img="bookMark.data[0].data[1].icon" -->
+    <!-- :img="bookMark.data[0].data[1].icon" -->
     <imgCropper
       :imgCropperShow="imgCropperShow"
+      :img="bookMark.data[singleBookMarkData.indexParent].data[singleBookMarkData.indexChild].icon"
       @cropperCallBack = "imgCropperCallBack"
     ></imgCropper>
   </div>
@@ -779,7 +797,7 @@ export default {
       itemStyleObjTmp: {"fontSize":"24px","background":"#000"},
 
       // 滑动组件的默认值
-      vueSliderValue: 12,
+      vueSliderValue: 24,
       // 滑动组件初始化值
       vueSliderOption: {
         width: 212,
@@ -788,7 +806,7 @@ export default {
         interval: 2,
         tooltipDir: 'right',
         min: 12,
-        max: 30,
+        max: 40,
       },
       // 变价添加书签，背景颜色选中index
       bookMarkBgActiveIndex: -1,
@@ -871,6 +889,7 @@ export default {
         '#f34236',
         '#9b27af',
         '#663ab6',
+        '#fff',
         'rgba(0, 0, 0, 0.3)',
       ],
 
@@ -1286,7 +1305,7 @@ export default {
             data: [
               {
                 name: 'vue官网',
-                icon: 'https://cn.vuejs.org/images/logo.png',
+                icon: 'http://hackbinimg.luokangyuan.com/20181026091093/wei-xin-tu-pian-_20181026095000.jpg',
                 iconType:'image',
                 style:'{"fontSize":"24px","color":"red"}',
                 url:'https://cn.vuejs.org/'
@@ -1658,7 +1677,7 @@ export default {
         case 'delete':
           alert('删除');
           break;
-      
+
         default:
           break;
       }
@@ -1666,13 +1685,15 @@ export default {
 
     // ========== 图片裁剪回调 ============
     imgCropperCallBack: function (opts) {
+      var oldBookMarkIcon = this.bookMark.data[this.singleBookMarkData.indexParent].data[this.singleBookMarkData.indexChild].icon;
       // 确认裁剪
       if( opts.active == "cropper") {
+        this.bookMark.data[this.singleBookMarkData.indexParent].data[this.singleBookMarkData.indexChild].icon = opts.data;
         this.imgCropperShow = false;
-        this.bookMark.data[0].data[1].icon = opts.data;
       } else
       // 取消裁剪
       if( opts.active == "cancel" ) {
+        this.bookMark.data[this.singleBookMarkData.indexParent].data[this.singleBookMarkData.indexChild].icon = oldBookMarkIcon;
         this.imgCropperShow = false;
       }
     },
@@ -2948,7 +2969,8 @@ export default {
         background:rgba(255, 255, 255, .7);
         .preview-box{
           width: 100%;
-          height: 160px;
+          height: 120px;
+          margin-top: 20px;
         }
         .bm-ea-set-detail{
           padding: 0 50px;
@@ -3005,9 +3027,10 @@ export default {
             }
           }
           .icontype-box{
-            width:100%;
+            position: absolute; 
+            width:300px;
             height: 150px;
-            border: 1px solid #ffffff;
+            // border: 1px solid rgba(255, 255, 255, 0.8);
             .image-box{
               position: relative;
               width: 120px;
@@ -3037,6 +3060,9 @@ export default {
                 }
               }
             }
+          }
+          .txt-type-box{
+            position: absolute;
           }
         }
         .bottom-ctrl{

@@ -1,7 +1,7 @@
 <template>
   <!-- 图片裁剪 -->
-  <transition name="opacityShow">
-    <div class="my-img-cropper-box mid-center" v-show="imgCropperShow">
+  <transition name="to-top">
+    <div class="my-img-cropper-box mid-center" v-if="imgCropperShow">
       <transition name="to-top">
         <div class="cropper-box" v-show="imgCropperShow">
           <!-- 截图框 -->
@@ -43,19 +43,19 @@
           </div>
 
           <!-- 背景颜色 -->
-          <div class="cropper-img-bgcolor">
-            <h4 class="cropper-img-bgcolor-title">背景颜色</h4>
+          <!-- <div class="cropper-img-bgcolor">
+            <h4 class="cropper-img-bgcolor-title">背景颜色{{cropperOpts.img}}</h4>
             <div class="color-list-box">
-              <!-- 预设颜色 -->
+              预设颜色
               <div class="color-item mid-center" 
               v-for="(colorItem, index) in colorArr" 
               :class="{active: index == colorActiveIndex}"
               @click="selectColor (index)"
               :style="{backgroundColor:colorItem}">{{index + 1}}</div>
-              <!-- 取色 -->
+              取色
               <input class="color-item mid-center select-color"  type="color" name="" id="">
             </div>
-          </div>
+          </div> -->
           <!-- 确认 取消 操作按钮 -->
           <div class="cropper-bottom mid-center">
             <myButton :btnType="'red'" @myBtnFun="hideImgCropper">取消裁剪</myButton>
@@ -79,9 +79,9 @@ export default {
   props: ["imgCropperShow", "img"],
   data(){
     return {
-      // 图片裁剪配置
+      // 图片裁剪配置 || 'http://hackbinimg.luokangyuan.com/20180823130898/logoblue.png'
       cropperOpts: {
-        img: this.img || 'http://hackbinimg.luokangyuan.com/20180823130898/logoblue.png',
+        img: this.img,
         outputType: 'png',
         autoCrop: true,          // 是否默认生成截图框
         autoCropWidth: 200,
@@ -170,6 +170,10 @@ export default {
       this.colorActiveIndex = index;
     },
 
+  },
+
+  mounted: function () {
+    console.log(this.cropperOpts.img)
   }
 };
 </script>
@@ -183,11 +187,11 @@ export default {
   left:0;
   width: 100%;
   height:100%;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.8);
   .cropper-box{
     position: relative;
     width: 580px;
-    height:500px;
+    height:420px;
     background: #fff;
     box-shadow: @box-shadow;
     padding: 30px;
