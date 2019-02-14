@@ -25,7 +25,7 @@
           @keyup.up="tipUp"
           @keyup.down="tipDown"
           placeholder="请输入搜索内容" >
-
+          
           <!-- 搜索按钮 -->
           <label class="searchmore-submit">
             <div class="submit-name hover-bg" 
@@ -34,7 +34,7 @@
               @click="searchNow(index)"
             >搜索{{searchObj.name}}</div>
             <!-- 其他搜索类型 -->
-            <div class="more-search-opts" @mouseover="moreSearchShow = true" @mouseleave="moreSearchShow = false">
+            <!-- <div class="more-search-opts" @mouseover="moreSearchShow = true" @mouseleave="moreSearchShow = false">
               <div class="more-trigger hover-bg">
                 <i class="icon-xiala"></i>
               </div>
@@ -48,15 +48,33 @@
                   </ul>
                 </div>
               </transition>
-            </div>
+            </div> -->
           </label>
 
           <!-- 三根聚焦时的线 -->
-          <div class="border-line line-top" :class="inputFocusBool == true ? 'focus' : ''"></div>
-          <div class="border-line line-bottom" :class="inputFocusBool == true ? 'focus' : ''"></div>
+          <!-- <div class="border-line line-top" :class="inputFocusBool == true ? 'focus' : ''"></div>
+          <div class="border-line line-bottom" :class="inputFocusBool == true ? 'focus' : ''"></div> -->
           <div class="line-left" :class="inputFocusBool == true ? 'focus' : ''"></div>
-        </div>
 
+          <!-- 背景图片模糊效果 -->
+          <div v-show="!searchResultShow" class="input-blurbg" :style="{backgroundImage: 'url(' +bgObj.src+ ')'}"></div>
+        </div>
+        <!-- 其他搜索类型 -->
+        <div class="more-search-opts" @mouseover="moreSearchShow = true" @mouseleave="moreSearchShow = false">
+          <div class="more-trigger hover-bg mid-center">
+            <i class="icon-xiala"></i>
+          </div>
+          <transition name="to-top">
+            <div class="more-search-list" v-show="moreSearchShow">
+              <ul>
+                <li  class="ms-item hover-bg mid-center"
+                v-for="(searchObj, index) in browserArr"
+                v-if="searchObj.active"
+                @click="searchNow(index)">{{searchObj.name}}</li>
+              </ul>
+            </div>
+          </transition>
+        </div>
         <!-- 搜索结果 提示 -->
         <transition name="to-top">
           <div class="search-tip" 
@@ -66,17 +84,18 @@
           >
             <ul>
               <li class="tip-item" 
-              :class="{active:indexChild == searchTipObj.nowIndex}" 
+              :class="{active:indexChild == searchTipObj.nowIndex}"  
               v-for="(tipItem, indexChild) in searchTipObj.data" 
               @click="selectTip(indexParent, indexChild)">
                 <span>{{tipItem}}</span>
               </li>
             </ul>
+            <!-- 背景图片模糊效果 -->
+            <!-- <div v-show="!searchResultShow" class="bg" :style="{backgroundImage: 'url(' +bgObj.src+ ')'}"></div> -->
           </div>
         </transition>
 
         <!-- 设置页面 -->
-        <!-- <div class="set-panel"> -->
         <div class="set-panel" 
           @mouseover="setPanelShow = true" 
           @mouseleave="setPanelShow = false"
@@ -123,15 +142,7 @@
                   :changeData="bsItemObj"
                   @switchFun = "selectobj"
                   ></MySwitch>
-                  <!-- <div class="switch-obj">
-                    <input class="switch-btn" type="checkbox" 
-                    :checked="bsItemObj.active" 
-                    :name="bsItemObj.name" 
-                    :id="bsItemObj.iconName">
-                    <label :for="bsItemObj.iconName" @click="selectObj(indexParent)" class="switch-btn-label"></label>
-                  </div> -->
                   <div class="obj-name">
-                    <!-- <i :class="bsItemObj.iconName"></i>&nbsp; -->
                     <span>{{bsItemObj.name}}：</span>
                   </div>
                   <div class="browser-item" 
@@ -149,25 +160,6 @@
                   </div>
                 </div>
               </draggable>
-              <!-- 扫一扫 -->
-              <!-- <div class="erwema-box">
-                <div class="erweima-title">只要扫一下其中一个二维码，你的钱包就会少两块钱</div>
-                <div class="erweima-content">
-                  <div class="erweima-img-box">
-                    <img class="erweima-img" src="http://hackbinimg.luokangyuan.com/getmoney/getmoneyqq.png" alt="">
-                    <span>QQ</span>
-                  </div>
-                  <div class="erweima-img-box">
-                    <img class="erweima-img" src="http://hackbinimg.luokangyuan.com/getmoney/getmoneywx.png" alt="">
-                    <span>微信</span>
-                  </div>
-                  <div class="erweima-img-box">
-                    <img class="erweima-img" src="http://hackbinimg.luokangyuan.com/getmoney/getmoneyzfb.png" alt="">
-                    <span>支付宝</span>
-                  </div>
-                </div>
-              </div> -->
-
               <!-- <div class="blur-bg" :style="{backgroundImage: 'url(' +bgObj.src+ ')'}"></div> -->
             </div>
           </transition>
@@ -245,17 +237,17 @@
     <!-- 搜索结果页面浏览器切换按钮 -->
     <transition name="to-bottom">
       <div class="hd-broser-list" v-show="searchResultShow" v-for="(bsItemArr, parentObjName) in browserArr" v-if="bsItemArr.current">
-        <transition-group name="to-bottom" tag="div">
+        <!-- <transition-group name="to-bottom" tag="div"> -->
           <div class="item"
           v-for="(bsItem, indexChild) in bsItemArr.data" 
           :key="bsItem.name"
           :class="bsItem.current == true ? 'active hover-bg' : ''"
           v-if="bsItem.icon != 'icon-add' && bsItem.active == true"
           @click="changeBrowser(parentObjName, indexChild)">
-            <i :class="bsItem.icon"></i>
+            <!-- <i :class="bsItem.icon"></i> -->
             {{bsItem.name}}
           </div>
-        </transition-group>
+        <!-- </transition-group> -->
       </div>
     </transition>
 
@@ -273,6 +265,7 @@
     <transition name="opacityShow">
       <div class="side-book-mark as-opacity" 
         v-if="bookMark.sideDisplay != 2"
+        v-show="!searchResultShow"
       >
         <div class="bm-content mid-center">
           <div class="triggrt" :class="{active: subBookMarkShow}">
@@ -298,8 +291,7 @@
                   draggable="true" 
                   class="bm-item" 
                   v-for="(bmItem, index) in bookMark.data" 
-                  @mouseover="hoverBookMark(index)"
-                  :title="bmItem.name"
+                  @mouseover="hoverBookMark(index, $event)"
                 >
                   <div class="touch icon-tuodong"></div>
                   <i :class="bmItem.icon"></i>
@@ -316,8 +308,9 @@
               v-show="subBookMarkShow"
               @mouseover="subBookMarkShow = true" 
               @mouseleave="subBookMarkShow = false"
+              
             >
-              <div class="sub-list-box" :class="{whitebg: searchResultShow}">
+              <div class="sub-list-box" ref="subListBox" :style="subBookMarkPosition" :class="{whitebg: searchResultShow}">
 
                 <div class="content-box" v-for="(bmItem, indexParent) in bookMark.data" v-show="bmItem.show">
                   <div class="sub-box-title">
@@ -850,6 +843,9 @@ export default {
 
       // 书签子类展示
       subBookMarkShow: false,
+
+      //子书签Y位置
+      subBookMarkPosition: 'top:0px',
 
       // 个人页面展示
       personnalShow: false,
@@ -1566,7 +1562,8 @@ export default {
     },
 
     // 鼠标覆盖便签大类
-    hoverBookMark: function (index) {
+    hoverBookMark: function (index, e) {
+      // 显示子类书签
       for(let i=0; i<this.bookMark.data.length; i++) {
         if(i == index) {
           this.bookMark.data[i].show = true;
@@ -1574,6 +1571,19 @@ export default {
           this.bookMark.data[i].show = false;
         }
       }
+      // 书签高度
+      var curPosition = e.currentTarget.getBoundingClientRect();
+      setTimeout(() => {
+        var subListBoxElPosition = this.$refs.subListBox.getBoundingClientRect();
+        // 子书签超出屏幕
+        if(subListBoxElPosition.height + curPosition.y > document.body.clientHeight) {
+          this.subBookMarkPosition = 'top:' +(curPosition.y - subListBoxElPosition.height + curPosition.height) +'px';
+        } 
+        // 子书签在屏幕内
+        else {
+          this.subBookMarkPosition = 'top:' +curPosition.y+ 'px';
+        };
+      }, 1);
     },
 
     // 备份数据
@@ -1843,6 +1853,8 @@ export default {
         z-index: 3;
         width: 640px;
         vertical-align: middle;
+        overflow: hidden;
+        // box-shadow: @box-shadow;
         .line-left{
           position: absolute;
           z-index: 100;
@@ -1874,12 +1886,14 @@ export default {
         }
         .searchmore-input-text{
           position: relative;
+          z-index: 2;
           vertical-align: middle;
           border: none;
           width: 520px;
           height: 40px;
-          background: rgba(255, 255, 255, .5);
-          box-shadow: 0 0 30px rgb(255, 255, 255) inset;
+          // background: transparent;
+          background: rgba(255, 255, 255, 0.3);
+          box-shadow: 0 0 30px rgba(255, 255, 255, 0.651) inset;
           line-height: 40px;
           padding: 0 40px 0 10px;
           transition:@animateTime;
@@ -1891,8 +1905,25 @@ export default {
             border-bottom:1px solid #d6d6d6;
           }
         }
+        .input-blurbg{
+          position: absolute;
+          z-index: 1;
+          top:0;
+          left:0;
+          width: 100vw;
+          height: 100vh;
+          background-attachment: fixed;
+          background-repeat: no-repeat;
+          background-position: center;
+          background-color: rgb(255, 255, 255);
+          background-size: 100%;
+          transform: translate(-50%, -40vh);
+          opacity: .8;
+          filter: blur(30px);
+        }
         .searchmore-submit{
           position: relative;
+          z-index: 2;
           align-items: center;
           width: 120px;
           height: 40px;
@@ -1907,42 +1938,6 @@ export default {
           .submit-name{
             flex-shrink: 0;
             width: 100%;
-          }
-          .more-search-opts{
-            position: absolute;
-            top:40px;
-            flex-shrink: 0;
-            .more-trigger{
-              position: absolute;
-              font-size: 12px;
-              margin-top: -40px;
-              margin-left: 100px;
-              width: 20px;
-              height: 40px;
-              background: @main-color;
-              border-left: 1px solid #e03e3e;
-              >i{
-                display:inline-block;
-                transition: @animateTime;
-                transform: scale(.8);
-              }
-            }
-            .more-search-list{
-              width:120px;
-              box-shadow: @box-shadow;
-              .ms-item{
-                list-style: none;
-                background: @main-color;
-              }
-            }
-            &:hover{
-              .more-trigger{
-                background: #cc1212;
-                >i{
-                  transform: translateY(3px) scale(.8);
-                }
-              }
-            }
           }
         }
         .first-engine{
@@ -1992,6 +1987,47 @@ export default {
           }
         }
       }
+      .more-search-opts{
+        position: fixed;
+        z-index: 10;
+        left: 520px;
+        top:40px;
+        color: #fff;
+        cursor: pointer;
+        .more-trigger{
+          position: absolute;
+          font-size: 12px;
+          margin-top: -40px;
+          margin-left: 100px;
+          width: 20px;
+          height: 40px;
+          background: @main-color;
+          border-left: 1px solid #e03e3e;
+          >i{
+            display:inline-block;
+            transition: @animateTime;
+            transform: scale(.8);
+          }
+        }
+        .more-search-list{
+          width:120px;
+          box-shadow: @box-shadow;
+          .ms-item{
+            list-style: none;
+            height: 40px;
+            line-height: 40px;
+            background: @main-color;
+          }
+        }
+        &:hover{
+          .more-trigger{
+            background: #cc1212;
+            >i{
+              transform: translateY(1px) scale(.8);
+            }
+          }
+        }
+      }
       .set-panel{
         position: absolute;
         margin-top: 40px;
@@ -2008,6 +2044,7 @@ export default {
           height:30px;
           top:-30px;
           right:130px;
+          color: @main-txt-color;
           i{
             cursor: pointer;
             display:inline-block;
@@ -2020,7 +2057,7 @@ export default {
           width:100%;
           max-height: 320px;
           overflow-y: auto;
-          background:rgba(255,255, 255, 0.9);
+          background:rgb(255, 255, 255);
           box-shadow: @box-shadow;
           padding: 20px 20px 2px;
           .browser-list-box{
@@ -2138,30 +2175,50 @@ export default {
         position: absolute;
         width: 520px;
         margin-top: 40px;
-        background: rgba(255, 255, 255, 0.8);
         box-shadow: @box-shadow;
         border-bottom: 1px solid @main-color;
-        .tip-item{
-          list-style: none;
-          padding: 0 10px;
-          height: 30px;
-          line-height: 30px;
-          // transition: @animateTime;
-          cursor: pointer;
-          span{
-            display: inline-block;
-            transition: @animateTime;
+        overflow: hidden;
+        >ul{
+          position: relative;
+          z-index: 2;
+          background: rgb(255, 255, 255);
+          .tip-item{
+            list-style: none;
+            padding: 0 10px;
+            height: 30px;
+            line-height: 30px;
+            // transition: @animateTime;
+            cursor: pointer;
+            span{
+              display: inline-block;
+              transition: @animateTime;
+            }
+            &:hover{
+              border-left: 1px solid @main-color;
+              background-color: #f1f1f1;
+              color: @main-color;
+            }
+            &.active{
+              border-left: 1px solid @main-color;
+              background-color: #f1f1f1;
+              color: @main-color;
+            }
           }
-          &:hover{
-            border-left: 1px solid @main-color;
-            background-color: #f1f1f1;
-            color: @main-color;
-          }
-          &.active{
-            border-left: 1px solid @main-color;
-            background-color: #f1f1f1;
-            color: @main-color;
-          }
+        }
+        .bg{
+          position: absolute;
+          z-index: 1;
+          top:0;
+          left:0;
+          width: 100vw;
+          height: 90vh;
+          background-attachment: fixed;
+          background-repeat: no-repeat;
+          background-position: center;
+          background-color: rgb(255, 255, 255);
+          background-size: 100%;
+          transform: translate(-50%, -40vh);
+          filter: blur(30px);
         }
       }
     }
@@ -2237,14 +2294,13 @@ export default {
     }
   }
 
-  .hd-broser-list > div{
+  .hd-broser-list{
     position: fixed;
     z-index: 60;
     height: 50px;
     display: flex;
     flex-direction: row;
     align-items: center;
-    width: calc(~'100% - 780px');
     left: 780px;
     .item{
       // float: left;
@@ -2403,7 +2459,7 @@ export default {
                 border-top: 1px solid rgba(255, 255, 255, 0.1);
               }
               &:hover{
-                background: @main-color-dark;
+                background: @main-color;
               }
             }
           }
@@ -2414,20 +2470,20 @@ export default {
         z-index: 120;
         margin-left: 100px;
         width: 100vw;
-        height:100vh;
+        // height:100vh;
         top:0;
         left: 0;
         // background: rgba(0, 0, 0, 0.7);
-        display: flex;
-        align-items: center;
+        // display: flex;
+        // align-items: center;
         .sub-list-box{
-          position: relative;
-          min-height:148px;
+          position: absolute;
+          // min-height:148px;
           max-width: 836px;
           overflow: hidden;
           // padding-left: 20px;
           // box-shadow: 5px 0 50px rgba(0, 0, 0, 0.3);
-          transition: @animateTime;
+          // transition: @animateTime;
           &.whitebg{
             background: rgb(255, 255, 255);
           }
@@ -2487,7 +2543,8 @@ export default {
     }
     &.as-opacity{
       transform: translateX(0%);
-      background: transparent;
+      // background: transparent;
+      width: 55px;
       border: none;
       box-shadow: 0 0 0 transparent;
       .bm-content{
@@ -2523,7 +2580,7 @@ export default {
           }
         }
         .sub-list-content{
-          // margin-left: -50px;
+          margin-left: 55px;
         }
       }
     }
@@ -2715,7 +2772,7 @@ export default {
         left:0;
         width: 100%;
         height:100%;
-        background: rgba(255, 255, 255, 0.6);
+        background: rgba(255, 255, 255, 0.7);
         color: @main-txt-color;
         display: flex;
         flex-direction: column;
