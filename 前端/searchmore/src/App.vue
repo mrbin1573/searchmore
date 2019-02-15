@@ -11,20 +11,22 @@
       <div class="input-search-box">
         <!-- 搜索框 -->
         <div class="input-box">
-          <input type="text" id="inputObj"
-          class="searchmore-input-text"
-          :class="{afterSearch:searchResultShow}"
-          ref="inputbox" 
-          v-for="(searchObj, indexParent) in browserArr" 
-          v-if="indexParent == 0"
-          v-model="searchTxt"
-          @keyup.enter="inputEnter(indexParent)"
-          @input="getBaidu"
-          @blur="inputLeave"
-          @focus="inputFocus"
-          @keyup.up="tipUp"
-          @keyup.down="tipDown"
-          placeholder="请输入搜索内容" >
+          <div class="input-txt-box">
+            <input type="text" id="inputObj"
+            class="searchmore-input-text"
+            :class="{afterSearch:searchResultShow}"
+            ref="inputbox" 
+            v-for="(searchObj, indexParent) in browserArr" 
+            v-if="indexParent == 0"
+            v-model="searchTxt"
+            @keyup.enter="inputEnter(indexParent)"
+            @input="getBaidu"
+            @blur="inputLeave"
+            @focus="inputFocus"
+            @keyup.up="tipUp"
+            @keyup.down="tipDown"
+            placeholder="" >
+          </div>
           
           <!-- 搜索按钮 -->
           <label class="searchmore-submit">
@@ -291,6 +293,7 @@
                   draggable="true" 
                   class="bm-item" 
                   v-for="(bmItem, index) in bookMark.data" 
+                  v-if="bmItem.name != '常用'"
                   @mouseover="hoverBookMark(index, $event)"
                 >
                   <div class="touch icon-tuodong"></div>
@@ -408,17 +411,17 @@
               <li class="cuosor_p hover-eff" title="所有的设置项"
                 @click="changeSuperSetting"
               >
-                <span>
+                <div class="w_100p">
                   <i class="icon-cogs"></i>
                   <span class="name">超级设置</span>
                   <span class="des">所有可配置项</span>
-                </span>
+                </div>
               </li>
               <li class="cuosor_p hover-eff" title="详细使用帮助">
-                <span>
+                <div>
                   <i class="icon-deng"></i>
                   <span class="name">使用帮助</span>
-                </span>
+                </div>
               </li>
             </ul>
           </div>
@@ -1428,7 +1431,7 @@ export default {
       } else {
         this.alertObj.show = true;
         this.alertObj.text = "请输入搜索内容";
-        this.alertObj.textEn = "no empty, ojbk?";
+        this.alertObj.textEn = "Please enter the search content";
       }
     },
 
@@ -1788,7 +1791,7 @@ export default {
     // 必应壁纸 http://bing.ioliu.cn/v1
     this.$http.jsonp('http://bing.ioliu.cn/v1',
       {
-        params:{d:wallpapperDay},
+        // params:{d:wallpapperDay},
         jsonp:'callback'
       })
       .then(function(res){
@@ -1884,25 +1887,34 @@ export default {
             width:100%;
           }
         }
-        .searchmore-input-text{
+        .input-txt-box{
           position: relative;
           z-index: 2;
-          vertical-align: middle;
-          border: none;
           width: 520px;
           height: 40px;
-          // background: transparent;
-          background: rgba(255, 255, 255, 0.3);
-          box-shadow: 0 0 30px rgba(255, 255, 255, 0.651) inset;
-          line-height: 40px;
-          padding: 0 40px 0 10px;
-          transition:@animateTime;
-          font-size: 16px;
           float: left;
-          outline: none;
-          &.afterSearch{
-            border-top:1px solid #d6d6d6;
-            border-bottom:1px solid #d6d6d6;
+          overflow: hidden;
+          .searchmore-input-text{
+            position: relative;
+            vertical-align: middle;
+            border: none;
+            width: 560px; // 多出40px 隐藏左右内阴影
+            height: 40px;
+            margin-left: -20px;
+            background: transparent;
+            // background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.822) inset;
+            line-height: 40px;
+            padding: 0 60px 0 30px;
+            transition:@animateTime;
+            font-size: 16px;
+            float: left;
+            outline: none;
+            color: @main-color;
+            &.afterSearch{
+              border-top:1px solid #d6d6d6;
+              border-bottom:1px solid #d6d6d6;
+            }
           }
         }
         .input-blurbg{
@@ -1919,7 +1931,7 @@ export default {
           background-size: 100%;
           transform: translate(-50%, -40vh);
           opacity: .8;
-          filter: blur(30px);
+          filter: blur(50px);
         }
         .searchmore-submit{
           position: relative;
@@ -2044,7 +2056,7 @@ export default {
           height:30px;
           top:-30px;
           right:130px;
-          color: @main-txt-color;
+          color: rgb(206, 206, 206);
           i{
             cursor: pointer;
             display:inline-block;
@@ -2692,6 +2704,7 @@ export default {
           >li{
             width:100%;
             height:40px;
+            line-height: 40px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -2710,7 +2723,7 @@ export default {
               font-weight: bold;
             }
             .des{
-              margin-left: 3px;
+              float: right;
               font-size: 12px;
               color: #8d8d8d;
             }
