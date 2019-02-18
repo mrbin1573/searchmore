@@ -1791,7 +1791,7 @@ export default {
     // 必应壁纸 http://bing.ioliu.cn/v1
     this.$http.jsonp('http://bing.ioliu.cn/v1',
       {
-        // params:{d:wallpapperDay},
+        params:{d:wallpapperDay},
         jsonp:'callback'
       })
       .then(function(res){
@@ -1800,12 +1800,21 @@ export default {
         if(bgType == 'jpg' || bgType == 'png' || bgType == 'gif'){
           this.bgObj.type = "image";
         } else {
-          this.bgObj.type = "video";
+          // this.bgObj.type = "video";
+          this.bgObj.type = "image";
         }
         this.bgObj.src = bgSrc;
       },function(res){
         console.log('失败')
         console.log(res);
+      });
+    // 请求tag数据测试
+    this.$axios.get('http://192.168.1.7:8081/api/v1/tag/')
+      .then(function (response) {
+        console.log(response);
+      })
+      .catch(function (error) {
+        console.log(error);
       });
   },
   mounted: function () {
